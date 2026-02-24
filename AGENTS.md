@@ -8,6 +8,20 @@ Wet Donkey is a clean, fresh re-implementation of Flaming Horse (FH), not a cont
 
 Primary goal: extract lessons from FH failures and use them to build WD correctly from first principles.
 
+## Repository Context
+
+- GitHub repository: `https://github.com/zfifteen/wet-donkey` (public)
+- Production Python source root: `src/`
+- Canonical harness module: `src/harness/` (xAI Responses API)
+- Runtime artifacts: `projects/` (gitignored)
+
+## Current Status
+
+- Phase 1 (FH analysis): in progress
+- Phase 2 (lessons learned): active and populated in `docs/lessons-learned/flaming-horse-lessons.md`
+- Phase 3 (revised WD tech spec): draft coverage completed in `docs/tech-spec/`
+- Phase 4 (revised WD implementation plan): next active deliverable
+
 ## Repositories and Roles
 
 - Wet Donkey (implementation target): `/Users/velocityworks/IdeaProjects/wet-donkey`
@@ -31,6 +45,8 @@ If work requests conflict with this sequence, pause and explicitly call out the 
 - New wiki-style spec scaffold: `docs/tech-spec/`
 - Lessons learned index: `docs/lessons-learned/README.md`
 - FH analysis log: `docs/lessons-learned/flaming-horse-lessons.md`
+- FH PR audit evidence: `docs/analysis/fh-pr-audit/`
+- Revised implementation plan destination: `docs/implementation-plan/README.md` (create/update here)
 
 The wiki under `docs/tech-spec/` is the destination for the revised tech spec. Do not treat the old implementation plan as final truth.
 
@@ -44,6 +60,7 @@ The wiki under `docs/tech-spec/` is the destination for the revised tech spec. D
 - No architecture pivots without updating spec docs first.
 - Prefer deterministic state handling and explicit contracts over implicit behavior.
 - Keep docs and implementation in sync; flag drift immediately.
+- WD has one harness module only (`src/harness/`); do not reintroduce dual-harness architecture.
 
 ## Required Deliverables by Phase
 
@@ -74,7 +91,7 @@ Populate `docs/tech-spec/` section-by-section with:
 
 ### Phase 4: Revised WD Implementation Plan
 
-Update/replace implementation planning so it is:
+Update/replace implementation planning in `docs/implementation-plan/README.md` so it is:
 - derived from the revised tech spec
 - sequenced by milestones
 - testable at each milestone
@@ -106,8 +123,9 @@ The planning foundation is complete only when all are true:
 If you start with no prior context:
 1. Read this file first.
 2. Read `docs/lessons-learned/README.md` and `docs/lessons-learned/flaming-horse-lessons.md`.
-3. Read `docs/tech-spec/README.md` and section stubs/status.
-4. Read the current implementation plan.
-5. Propose work only within the current phase of the canonical game plan.
+3. Read `docs/analysis/fh-pr-audit/` evidence artifacts as needed.
+4. Read `docs/tech-spec/README.md` and section drafts/status.
+5. Read the current implementation plan in `docs/implementation-plan/README.md` (or create it if absent).
+6. Propose work only within the current phase of the canonical game plan.
 
 When uncertain, optimize for architectural clarity, maintainability, and documented rationale over speed.
