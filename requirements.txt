@@ -1,0 +1,11 @@
+# Python dependencies for Wet Donkey
+
+# LLM and schema
+xai-sdk
+pydantic
+
+# Prompt templating
+Jinja2
+
+# Animation engine
+manim
