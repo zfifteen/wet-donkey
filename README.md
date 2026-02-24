@@ -1,4 +1,6 @@
-# Wet Donkey (formerly Flaming Horse)
+![Wet Donkey Banner](assests/wet_donkey_readme_banner.jpeg)
+
+# Wet Donkey
 
 Wet Donkey is a deterministic, script-orchestrated pipeline that converts a topic string into a fully narrated [Manim](https://www.manim.community/) video with minimal human intervention.
 
