@@ -1,4 +1,4 @@
-# harness_responses/schemas/narration.py
+# harness/schemas/narration.py
 # Placeholder for narration schema
 from pydantic import BaseModel, Field
 from typing import List

@@ -1,8 +1,8 @@
-# tests/harness_responses/test_collections_search.py
+# tests/harness/test_collections_search.py
 import unittest
 from unittest.mock import MagicMock, patch
-from harness_responses.session import PipelineTrainingSession
-from harness_responses.parser import validate_collections_usage
+from harness.session import PipelineTrainingSession
+from harness.parser import validate_collections_usage
 
 class TestCollectionsSearch(unittest.TestCase):
 
@@ -11,7 +11,7 @@ class TestCollectionsSearch(unittest.TestCase):
         self.session = MagicMock(spec=PipelineTrainingSession)
         self.session.collection_ids = ["coll_test_1", "coll_test_2"]
 
-    @patch('harness_responses.session.Client')
+    @patch('harness.session.Client')
     def test_chat_creation_with_collections_tool(self, MockClient):
         """
         Test that the created chat object includes the collections_search tool.

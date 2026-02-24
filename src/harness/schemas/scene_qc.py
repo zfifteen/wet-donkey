@@ -1,4 +1,4 @@
-# harness_responses/schemas/scene_qc.py
+# harness/schemas/scene_qc.py
 # Placeholder for scene QC schema
 from pydantic import BaseModel, Field
 from typing import List

@@ -1,1 +1,1 @@
-# harness/__init__.py
+"""Primary xAI Responses harness package."""

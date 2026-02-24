@@ -22,7 +22,7 @@ Define WD’s core modules, boundaries, and ownership so implementation stays mo
 - Owns phase execution order, transition rules, retry budget enforcement, and state writes.
 - Must not contain phase-specific parsing/business logic.
 
-2. Harness (`harness_responses/`)
+2. Harness (`harness/`)
 - Owns model invocation, tool wiring, and structured output requests.
 - Must not directly mutate orchestrator state.
 

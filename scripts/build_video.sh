@@ -6,8 +6,6 @@ set -Eeuo pipefail
 # --- Config ---
 # Using python3.13 as per spec
 PYTHON_CMD="python3.13"
-# Default to 'responses' harness
-FH_HARNESS="${FH_HARNESS:-responses}"
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 ROOT_DIR=$(realpath "$SCRIPT_DIR/..")
 
@@ -30,7 +28,8 @@ advance_phase() {
     # Append to history
     local history
     history=$(get_state "history")
-    history=$(echo "$history" | jq ". + [{"phase": "$1", "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"}]")
+    history=${history:-[]}
+    history=$(echo "$history" | jq --arg phase "$1" --arg ts "$(date -u +%Y-%m-%dT%H:%M:%SZ)" '. + [{"phase": $phase, "timestamp": $ts}]')
     set_state "history" "$history"
 }
 
@@ -44,18 +43,15 @@ handle_init() {
         "$SCRIPT_DIR/new_project.sh" "$PROJECT_NAME" --topic "$TOPIC"
     fi
     
-    # Initialize Collections if using the 'responses' harness
-    if [[ "$FH_HARNESS" == "responses" ]]; then
-        # Check for XAI_MANAGEMENT_API_KEY
-        if [[ -z "${XAI_MANAGEMENT_API_KEY:-}" ]]; then
-            log_error "XAI_MANAGEMENT_API_KEY is not set. Cannot initialize collections."
-            log_error "Set FH_HARNESS=legacy to use the legacy harness."
-            exit 1
-        fi
-        $PYTHON_CMD "$SCRIPT_DIR/initialize_training_corpus.py" 
-            --project-dir "$PROJECT_DIR" 
-            --project-name "$PROJECT_NAME"
+    # Check for XAI_MANAGEMENT_API_KEY
+    if [[ -z "${XAI_MANAGEMENT_API_KEY:-}" ]]; then
+        log_error "XAI_MANAGEMENT_API_KEY is not set. Cannot initialize collections."
+        exit 1
     fi
+
+    $PYTHON_CMD "$SCRIPT_DIR/initialize_training_corpus.py" \
+        --project-dir "$PROJECT_DIR" \
+        --project-name "$PROJECT_NAME"
     
     advance_phase "plan"
 }
@@ -65,14 +61,13 @@ handle_plan() {
     # Check for XAI_API_KEY
     if [[ -z "${XAI_API_KEY:-}" ]]; then
         log_error "XAI_API_KEY is not set. Cannot generate plan."
-        log_error "Set FH_HARNESS=legacy to use the legacy harness."
         exit 1
     fi
 
-    # Invoke the responses harness
-    $PYTHON_CMD -m harness_responses.cli 
-        --phase "plan" 
-        --project-dir "$PROJECT_DIR" 
+    # Invoke the harness
+    $PYTHON_CMD -m harness.cli \
+        --phase "plan" \
+        --project-dir "$PROJECT_DIR" \
         --topic "$TOPIC"
 
     log_info "Plan generated. Review and approve to continue."

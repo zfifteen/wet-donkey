@@ -1,4 +1,4 @@
-# harness_responses/session.py
+# harness/session.py
 import os
 import json
 from pathlib import Path

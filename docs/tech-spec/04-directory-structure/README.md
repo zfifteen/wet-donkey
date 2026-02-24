@@ -19,8 +19,7 @@ Define a repository layout that separates source of truth, generated artifacts, 
 
 - `src/`: production Python source root.
 - `scripts/`: orchestrator and deterministic workflow scripts.
-- `src/harness/`: legacy harness package.
-- `src/harness_responses/`: LLM harness implementation and schemas/prompts.
+- `src/harness/`: LLM harness implementation and schemas/prompts.
 - `src/wet_donkey/`: scene helpers and shared runtime logic.
 - `src/wet_donkey_voice/`: voice adapter and caching implementation.
 - `docs/tech-spec/`: canonical technical spec wiki.

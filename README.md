@@ -80,8 +80,7 @@ The pipeline has a manual approval gate after the planning phase. To continue th
 ```text
 wet-donkey/
 ├── src/                  # Production Python packages
-│   ├── harness/          # Legacy harness package
-│   ├── harness_responses/ # xAI Responses API harness package
+│   ├── harness/          # xAI Responses API harness package
 │   ├── wet_donkey/       # Manim scene helpers package
 │   └── wet_donkey_voice/ # TTS services package
 ├── scripts/              # Orchestration and utility scripts

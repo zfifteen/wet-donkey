@@ -1,4 +1,4 @@
-# harness_responses/schemas/scene_build.py
+# harness/schemas/scene_build.py
 from pydantic import BaseModel, Field
 
 class SceneBuild(BaseModel):

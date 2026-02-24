@@ -1,14 +1,14 @@
-# tests/harness_responses/test_stateful_repair.py
+# tests/harness/test_stateful_repair.py
 import unittest
 from unittest.mock import MagicMock, patch
 
-from harness_responses.client import repair_scene
-from harness_responses.schemas.scene_build import SceneBuild
+from harness.client import repair_scene
+from harness.schemas.scene_build import SceneBuild
 
 class TestStatefulRepair(unittest.TestCase):
 
-    @patch('harness_responses.client.PipelineTrainingSession')
-    @patch('harness_responses.client.Path')
+    @patch('harness.client.PipelineTrainingSession')
+    @patch('harness.client.Path')
     def test_repair_scene_call_flow(self, MockPath, MockSession):
         """
         Test the call flow of the repair_scene function, ensuring it uses
@@ -48,7 +48,7 @@ class TestStatefulRepair(unittest.TestCase):
         )
         
         # 2. Check that the prompts were composed with the correct context
-        from harness_responses.prompts import compose_prompts
+        from harness.prompts import compose_prompts
         # This is a bit complex, we would need to also patch compose_prompts
         # to check the arguments passed to it. For now, we trust it's called.
 

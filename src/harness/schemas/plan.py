@@ -1,4 +1,4 @@
-# harness_responses/schemas/plan.py
+# harness/schemas/plan.py
 from pydantic import BaseModel, Field
 from typing import List
 

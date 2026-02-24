@@ -1,10 +1,10 @@
-# tests/harness_responses/test_session_state.py
+# tests/harness/test_session_state.py
 import unittest
 import json
 from pathlib import Path
 from unittest.mock import patch, mock_open
 
-from harness_responses.session import PipelineTrainingSession
+from harness.session import PipelineTrainingSession
 
 class TestSessionState(unittest.TestCase):
 
@@ -31,7 +31,7 @@ class TestSessionState(unittest.TestCase):
             json.dump(metadata_content, f)
 
         # Act
-        with patch('harness_responses.session.Client') as MockClient:
+        with patch('harness.session.Client') as MockClient:
             session = PipelineTrainingSession.from_project(self.project_dir)
 
             # Assert
@@ -55,7 +55,7 @@ class TestSessionState(unittest.TestCase):
             json.dump(session_data, f)
         
         # Act
-        with patch('harness_responses.session.Client'):
+        with patch('harness.session.Client'):
             session = PipelineTrainingSession.from_project(self.project_dir)
 
             # Assert
@@ -72,7 +72,7 @@ class TestSessionState(unittest.TestCase):
         with open(metadata_path, 'w') as f:
             json.dump(metadata_content, f)
 
-        with patch('harness_responses.session.Client'):
+        with patch('harness.session.Client'):
             session = PipelineTrainingSession.from_project(self.project_dir)
         
         # Act
