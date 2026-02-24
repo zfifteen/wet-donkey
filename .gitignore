@@ -1,0 +1,31 @@
+# Ignore project artifacts
+projects/
+tmp/
+
+# Python
+__pycache__/
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+pip-wheel-metadata/
+.eggs/
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+  
+# tooling/editor/runtime cache
+.idea/
+.pytest_cache/
+.benchmarks/
+
+# local env
+.env
+
+# Temporary analysis artifacts
+docs/analysis/fh-pr-audit
