@@ -5,6 +5,7 @@ This directory tracks Flaming Horse analysis artifacts used to drive Wet Donkey 
 ## Documents
 
 1. [Flaming Horse Analysis Execution Plan](./fh-analysis-plan.md)
+2. [Tech Spec Peer Review](./tech-spec-peer-review.md)
 
 ## Evidence Sets
 
