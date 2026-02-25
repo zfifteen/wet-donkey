@@ -56,6 +56,8 @@ The wiki under `docs/tech-spec/` is the destination for the revised tech spec. D
 - Every major WD design choice should trace to either:
   - an FH lesson learned, or
   - an explicit WD-first rationale documented in spec.
+- The LLM is not the orchestrator in WD. It is constrained to content-generation responsibilities only.
+- Deterministic code owns infrastructure responsibilities: file writes/mutations, phase advancement, retries/escalation, validation/policy enforcement, and state persistence.
 - Avoid hidden complexity and "self-heal loop" dependence as a design crutch.
 - No architecture pivots without updating spec docs first.
 - Prefer deterministic state handling and explicit contracts over implicit behavior.
