@@ -20,6 +20,8 @@ Define how WD integrates with the xAI Responses API in a stateful, schema-enforc
 - WD uses a dedicated responses harness as the only LLM integration path for v1.
 - Harness interactions are phase-scoped and contract-constrained.
 - Session continuation is explicit (no hidden implicit conversation state).
+- The harness mediates all LLM IO; LLM outputs are treated as untrusted content payloads until deterministic validators accept them.
+- LLM calls do not directly perform infrastructure actions (for example state advancement, file lifecycle control, or policy overrides).
 
 ### Session Lifecycle
 
@@ -66,3 +68,4 @@ Define how WD integrates with the xAI Responses API in a stateful, schema-enforc
 - WD will use one primary responses harness integration path for v1.
 - Structured schema output is mandatory for all phase calls.
 - Session continuation and tool usage are explicit, auditable, and contract-bound.
+- Orchestration authority remains deterministic and script-owned; LLM participation is bounded to schema-constrained content generation.

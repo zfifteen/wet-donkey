@@ -25,6 +25,7 @@ Define WD’s core modules, boundaries, and ownership so implementation stays mo
 2. Harness (`harness/`)
 - Owns model invocation, tool wiring, and structured output requests.
 - Must not directly mutate orchestrator state.
+- Must not act as phase authority; it returns contract-scoped payloads only.
 
 3. Prompt + Schema + Parser Layer
 - Prompts define task intent constrained to schema.
@@ -48,6 +49,7 @@ Define WD’s core modules, boundaries, and ownership so implementation stays mo
 - Cross-component communication occurs only through versioned contracts.
 - A component cannot “reach across” and fix another component’s invariants.
 - Temporary containment changes must include explicit removal conditions.
+- Deterministic orchestration code is the control plane; LLM output is data input to that control plane, never orchestration authority.
 
 ### Lessons Traceability
 
@@ -70,3 +72,4 @@ Define WD’s core modules, boundaries, and ownership so implementation stays mo
 - WD will enforce explicit component boundaries with contract-only integration points.
 - Orchestrator, harness, and validation layers remain separate ownership domains.
 - Voice provider details are adapter-internal and must not leak into phase logic.
+- Infrastructure operations (state updates, phase transitions, artifact lifecycle mutations) remain deterministic-code responsibilities.

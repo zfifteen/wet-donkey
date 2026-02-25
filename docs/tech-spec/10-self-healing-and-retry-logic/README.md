@@ -20,6 +20,7 @@ Define bounded, evidence-driven retry behavior that supports recovery without tu
 - Retries are fallback recovery, never the normal path to success.
 - First-pass quality is the primary objective.
 - Retry logic exists to recover from transient or targeted fixable failures.
+ - Evidence of “eventual convergence after heavy retry churn” is treated as a design smell that must trigger upstream fixes, not higher retry budgets.
 
 ### Retry Eligibility
 
@@ -41,6 +42,7 @@ Repair prompts must include:
 - gate failure code and message,
 - prior attempt delta summary,
 - applicable contract constraints.
+ - If the full prior context is too large, the orchestrator must include a deterministic diff summary plus a pointer to the preserved full payload in logs/artifacts.
 
 ### Loop Detection
 
@@ -50,6 +52,7 @@ Loop detector compares:
 - tool usage/citation changes.
 
 If no meaningful delta across attempts, stop retries.
+Context truncation that removes required diagnostics is a retry-ineligible failure.
 
 ### Lessons Traceability
 

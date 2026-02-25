@@ -23,6 +23,8 @@ WD converts a topic into a narrated Manim video through a deterministic multi-ph
 
 - Contract-first design across orchestrator, harness, prompts, schemas, and generated artifacts.
 - Deterministic phase ownership and state transitions.
+- Orchestration and infrastructure concerns are deterministic-code responsibilities, not LLM responsibilities.
+- LLM scope is constrained to bounded creative/content outputs inside contract-defined schemas.
 - First-pass correctness prioritized over retry volume.
 - Stable subsystem interfaces (LLM harness, TTS, retrieval, render assembly).
 - Documentation is authoritative and versioned with implementation.
@@ -54,3 +56,4 @@ WD converts a topic into a narrated Manim video through a deterministic multi-ph
 - WD will be developed contract-first with explicit traceability to lessons learned.
 - WD spec wiki (`docs/tech-spec/`) is canonical and must lead implementation updates.
 - WD architecture will optimize for deterministic operation and maintainability over rapid feature expansion.
+- WD explicitly separates concerns: deterministic code is the orchestrator/control plane; the LLM is a constrained content generator.

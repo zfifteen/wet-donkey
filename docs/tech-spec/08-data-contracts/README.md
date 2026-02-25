@@ -22,6 +22,7 @@ Define canonical data contracts across pipeline state, phase payloads, and gener
 - Harness owns structured phase outputs.
 - Parser/validators enforce semantic and runtime constraints.
 - Scaffold generator owns immutable scene file boundaries.
+- LLM output ownership is limited to schema-constrained content fields; deterministic code owns all infrastructure/state mutation contracts.
 
 ### Core Contracts
 
@@ -72,3 +73,4 @@ Define canonical data contracts across pipeline state, phase payloads, and gener
 - WD will use explicit versioned contracts for state, phase outputs, and session metadata.
 - Prompt, schema, parser, and orchestrator contracts must remain synchronized or CI fails.
 - Scaffold mutation outside slot boundaries is a hard contract violation.
+- LLM-generated payloads are untrusted until they pass deterministic contract and validation gates.

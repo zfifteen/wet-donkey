@@ -19,6 +19,7 @@ Define a test strategy that validates WD contracts early, prevents regressions d
 
 1. Contract tests
 - Validate schema, state, scaffold, and exit-code contracts.
+ - Include negative fixtures for missing or mutated scaffold boundary markers (for example `SLOT_START`).
 
 2. Unit tests
 - Component-local logic (parser, config validation, retry policy, helpers).
@@ -36,6 +37,8 @@ Define a test strategy that validates WD contracts early, prevents regressions d
 - Retry-loop detection and blocked escalation behavior.
 - Scaffold immutability enforcement.
 - Config preflight validation and deterministic defaults.
+ - Schema parse strictness under malformed/repair-pressure outputs.
+ - Retry-context preservation and truncation handling.
 
 ### CI Policy
 

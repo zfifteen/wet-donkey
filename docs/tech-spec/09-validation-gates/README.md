@@ -20,6 +20,7 @@ Define a strict validation hierarchy that blocks invalid artifacts early and pre
 1. Schema Gate (Harness output)
 - Validates phase output against canonical schema.
 - Failure outcome: reject output, retry eligible.
+ - No schema auto-repair; failures are surfaced with exact parse locations and field paths.
 
 2. Contract Gate (Parser + scaffold/state contracts)
 - Validates required fields, slot boundaries, and artifact contracts.
@@ -41,6 +42,7 @@ Define a strict validation hierarchy that blocks invalid artifacts early and pre
 
 - Each gate emits machine-readable error codes and human-readable context.
 - A failed gate must identify owner component and likely fix location.
+- Contract Gate must hard-fail if scaffold boundary markers are missing, reordered, or mutated (for example missing `SLOT_START`).
 - New gate additions require:
 - documented failure class addressed,
 - expected false-positive rate,
@@ -60,6 +62,7 @@ Define a strict validation hierarchy that blocks invalid artifacts early and pre
 | L-007 | Validation policy is spec-driven and versioned with implementation. |
 | L-009 | Validation hierarchy has explicit ownership and measurable purpose. |
 | L-003 | Failed validations cannot trigger unbounded blind retries. |
+| L-004 | Scaffold boundary integrity is enforced at the Contract Gate. |
 
 ## Open Questions
 
@@ -72,3 +75,4 @@ Define a strict validation hierarchy that blocks invalid artifacts early and pre
 - WD uses a layered validation hierarchy: schema -> contract -> semantic -> runtime -> assembly.
 - Every gate must be tied to a defined failure class and owner component.
 - Validation failures produce structured error payloads suitable for targeted retry prompts.
+- Scaffold boundary violations are treated as contract failures, not semantic fixes.

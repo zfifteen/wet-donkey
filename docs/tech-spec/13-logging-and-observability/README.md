@@ -46,6 +46,7 @@ Define observability standards that make WD failures diagnosable at the source a
 - Logs are structured JSONL for machine processing.
 - Human summary files are optional and derived from structured logs.
 - Sensitive data is redacted at write-time.
+ - When payloads exceed size limits, logs must preserve a complete raw artifact in deterministic storage and include a diff/summary pointer in the structured log event.
 
 ### Minimum Diagnostic Payload
 
@@ -55,6 +56,7 @@ For failures, include:
 - normalized signature,
 - prior-attempt comparison,
 - next-action recommendation.
+ - retry-context integrity marker (indicates whether full prior payload was preserved).
 
 ### Lessons Traceability
 
