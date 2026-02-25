@@ -46,6 +46,7 @@ Define a test strategy that validates WD contracts early, prevents regressions d
 - Helper signature validation and API kwargs allowlist enforcement.
 - Plot callback scalar-compatibility checks for `Axes.plot`.
 - Dashed-line rendering tests to ensure `stroke_dash` is rejected and `DashedVMobject` is accepted.
+- Camera capability tests to ensure moving-camera APIs are rejected unless explicitly enabled.
 
 ### CI Policy
 
