@@ -45,6 +45,97 @@ Define canonical data contracts across pipeline state, phase payloads, and gener
 - `.xai_session.json` and collection metadata must be versioned and backward-compatible within major WD spec version.
 - Missing required metadata is a hard failure, not silently repaired.
 
+5. Context Manager Contract (Draft)
+
+Status: draft (subject to refinement during tech spec iteration)
+
+Purpose: define the deterministic interface between orchestrator/harness and the Context Manager for payload assembly and context continuity enforcement.
+Logging: see `docs/tech-spec/13-logging-and-observability/README.md` for required Context Manager log fields.
+
+Required fields (input):
+- `model_id` (string)
+- `phase` (string)
+- `previous_response_id` (string | null)
+- `error_code` (string)
+- `error_message` (string)
+- `artifact_refs` (array of stable artifact pointers)
+- `artifact_diff` (string | null) — compact diff summary only
+- `retry_attempt` (int)
+- `context_budget_tokens` (int)
+- `timestamp_utc` (string)
+
+Required fields (output):
+- `payload` (string | structured object) — ready for model call
+- `payload_tokens_est` (int)
+- `payload_compacted` (bool)
+- `dropped_fields` (array of string)
+- `previous_response_id_valid` (bool)
+- `retry_eligible` (bool)
+
+Required invariants:
+- `payload_tokens_est <= context_budget_tokens`
+- If `previous_response_id_valid` is false, `retry_eligible` must be false unless `context_restored` is true.
+- If `retry_eligible` is false, orchestrator must fail closed with `needs_human_review`.
+
+Optional fields:
+- `context_restored` (bool)
+- `full_payload_pointer` (string) — deterministic pointer to full artifacts/logs
+- `compaction_reason` (string)
+
+Example (Draft)
+
+Input:
+```
+{
+  "model_id": "grok-4-1-fast-reasoning",
+  "phase": "build_scenes",
+  "previous_response_id": "ba857ddd-7be3-bfe8-c058-c0a9a37046aa",
+  "error_code": "RUNTIME_VALIDATION_FAILED",
+  "error_message": "MathTex compilation error in scene_03.py",
+  "artifact_refs": [
+    "logs/build.log#L770",
+    "logs/error.log#L119"
+  ],
+  "artifact_diff": "scene_03.py:34 MathTex string adjusted; removed \\left...\\right",
+  "retry_attempt": 2,
+  "context_budget_tokens": 8192,
+  "timestamp_utc": "2026-02-25T01:17:58Z"
+}
+```
+
+Output:
+```
+{
+  "payload": {
+    "phase": "build_scenes",
+    "error": {
+      "code": "RUNTIME_VALIDATION_FAILED",
+      "message": "MathTex compilation error in scene_03.py"
+    },
+    "diff": "scene_03.py:34 MathTex string adjusted; removed \\left...\\right",
+    "artifact_pointers": [
+      "logs/build.log#L770",
+      "logs/error.log#L119"
+    ]
+  },
+  "payload_tokens_est": 412,
+  "payload_compacted": true,
+  "dropped_fields": ["full_build_log", "full_error_log"],
+  "previous_response_id_valid": true,
+  "retry_eligible": true,
+  "full_payload_pointer": "logs/context_payloads/scene_03_retry_2.json",
+  "compaction_reason": "payload exceeded budget"
+}
+```
+
+Validation Checklist (Draft)
+- `model_id` is recognized and maps to a known context limit.
+- `context_budget_tokens` equals the derived budget for the model.
+- `payload_tokens_est` does not exceed `context_budget_tokens`.
+- `previous_response_id_valid` is true before allowing continuation.
+- `artifact_diff` is present if retry is permitted.
+- `dropped_fields` is non-empty when `payload_compacted` is true.
+
 ### Versioning Rules
 
 - Every contract includes a `contract_version` field.

@@ -28,6 +28,7 @@ Define how WD integrates with the xAI Responses API in a stateful, schema-enforc
 - Session initialized per project with versioned metadata.
 - Each phase invocation may continue prior response context if contract checks pass.
 - Session updates happen only on successful harness completion.
+ - Context Manager enforces per-model payload budgets and validates `previous_response_id` before any continuation.
 
 ### Structured Output Contract
 
@@ -56,6 +57,8 @@ Define how WD integrates with the xAI Responses API in a stateful, schema-enforc
 | L-005 | Structured outputs are schema-contract mandatory. |
 | L-007 | Integration policy is spec-authoritative and versioned. |
 | L-009 | Validation and tool evidence are first-class integration outputs. |
+| L-013 | Session continuation requires validated conversation pointers. |
+| L-014 | Per-model context limits are enforced before model calls. |
 
 ## Open Questions
 

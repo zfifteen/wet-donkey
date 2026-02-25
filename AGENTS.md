@@ -17,10 +17,16 @@ Primary goal: extract lessons from FH failures and use them to build WD correctl
 
 ## Current Status
 
-- Phase 1 (FH analysis): in progress
+- Phase 1 (FH analysis): in progress, focusing on runtime artifacts and logs in `docs/analysis/fh-pr-audit/flaming-horse-generated`
 - Phase 2 (lessons learned): active and populated in `docs/lessons-learned/flaming-horse-lessons.md`
 - Phase 3 (revised WD tech spec): draft coverage completed in `docs/tech-spec/`
 - Phase 4 (revised WD implementation plan): next active deliverable
+
+## Current Phase 2 Scope (Active)
+
+- Continue FH generated-runs analysis with emphasis on `conversation.log` context continuity.
+- Correlate conversation log findings to `build.log` and `error.log` failure modes.
+- Convert evidence into concrete lessons and update prevention status in `docs/lessons-learned/flaming-horse-lessons.md`.
 
 ## Repositories and Roles
 

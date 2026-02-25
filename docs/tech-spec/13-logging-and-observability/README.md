@@ -29,10 +29,15 @@ Define observability standards that make WD failures diagnosable at the source a
 2. Harness interaction log
 - Model calls, tool invocations, schema outcomes, response IDs.
 
-3. Validation log
+3. Context Manager log
+- Payload budget decisions, compaction events, dropped fields.
+- `previous_response_id` validation results and retry eligibility.
+- Per-model budget usage (tokens estimated vs budget).
+
+4. Validation log
 - Gate-level pass/fail, failure codes, owner component, retryability.
 
-4. Artifact lineage log
+5. Artifact lineage log
 - Inputs/outputs and version hashes per phase artifact.
 
 ### Correlation and Identity
@@ -57,6 +62,7 @@ For failures, include:
 - prior-attempt comparison,
 - next-action recommendation.
  - retry-context integrity marker (indicates whether full prior payload was preserved).
+ - context budget marker (estimated tokens, budget, compaction applied).
 
 ### Lessons Traceability
 
@@ -67,6 +73,7 @@ For failures, include:
 | L-007 | Operational behavior documented and aligned with spec contracts. |
 | L-009 | Validation ownership is visible in logs, reducing blind guardrail layering. |
 | L-010 | Runtime artifact lineage is explicit and separated from core source evolution. |
+| L-014 | Context budget enforcement is logged and auditable. |
 
 ## Open Questions
 

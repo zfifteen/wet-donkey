@@ -37,8 +37,10 @@ Define a test strategy that validates WD contracts early, prevents regressions d
 - Retry-loop detection and blocked escalation behavior.
 - Scaffold immutability enforcement.
 - Config preflight validation and deterministic defaults.
- - Schema parse strictness under malformed/repair-pressure outputs.
- - Retry-context preservation and truncation handling.
+- Schema parse strictness under malformed/repair-pressure outputs.
+- Retry-context preservation and truncation handling.
+- MathTex/LaTeX validity checks for generated formulas.
+- Manim color literal validation (reject non-color types).
 
 ### CI Policy
 

@@ -44,6 +44,30 @@ Repair prompts must include:
 - applicable contract constraints.
  - If the full prior context is too large, the orchestrator must include a deterministic diff summary plus a pointer to the preserved full payload in logs/artifacts.
 
+### Retry Payload Budgeting
+
+Retry payloads must be size-bounded against model context limits before any model call.
+
+Policy:
+- Define `retry_payload_max_tokens` per model as `min(8192, floor(context_limit_tokens * 0.05))`.
+- If the retry payload exceeds the budget, replace verbose fields with:
+  - error code + short message,
+  - minimal artifact diff (line ranges only),
+  - deterministic pointer to full artifacts in logs.
+- If the payload still exceeds the budget after compaction, the retry is ineligible and the phase must fail closed with `needs_human_review`.
+ - Retry payload assembly and compaction are owned by the Context Manager component.
+
+Model context limits (from xAI model list screenshot, 2026-02-25):
+- `grok-4-1-fast-reasoning`: 2,000,000
+- `grok-4-1-fast-non-reasoning`: 2,000,000
+- `grok-code-fast-1`: 256,000
+- `grok-4-fast-reasoning`: 2,000,000
+- `grok-4-fast-non-reasoning`: 2,000,000
+- `grok-4-0709`: 256,000
+- `grok-3-mini`: 131,072
+- `grok-3`: 131,072
+- `grok-2-vision-1212`: 32,768
+
 ### Loop Detection
 
 Loop detector compares:
@@ -62,6 +86,7 @@ Context truncation that removes required diagnostics is a retry-ineligible failu
 | L-002 | Retry outcomes feed explicit state transitions and blocked escalation. |
 | L-005 | Retry prompts are generated from structured gate outputs. |
 | L-009 | Retry policy is integrated with validation ownership, not ad hoc. |
+| L-014 | Retry payloads are size-bounded against model context limits. |
 
 ## Open Questions
 

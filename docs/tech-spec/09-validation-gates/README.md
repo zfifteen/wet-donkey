@@ -28,6 +28,7 @@ Define a strict validation hierarchy that blocks invalid artifacts early and pre
 
 3. Semantic Gate (Domain rules)
 - Validates policy/business constraints (timing bounds, layout tag allowlist, helper usage).
+- Validates MathTex/LaTeX strings and Manim color literals before runtime execution.
 - Failure outcome: reject output, retry eligible with semantic diff guidance.
 
 4. Runtime Gate (Execution checks)
@@ -63,6 +64,8 @@ Define a strict validation hierarchy that blocks invalid artifacts early and pre
 | L-009 | Validation hierarchy has explicit ownership and measurable purpose. |
 | L-003 | Failed validations cannot trigger unbounded blind retries. |
 | L-004 | Scaffold boundary integrity is enforced at the Contract Gate. |
+| L-011 | MathTex/LaTeX validity is enforced before runtime render. |
+| L-012 | Manim color literals are validated to prevent runtime type errors. |
 
 ## Open Questions
 

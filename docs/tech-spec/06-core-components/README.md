@@ -27,20 +27,28 @@ Define WD’s core modules, boundaries, and ownership so implementation stays mo
 - Must not directly mutate orchestrator state.
 - Must not act as phase authority; it returns contract-scoped payloads only.
 
-3. Prompt + Schema + Parser Layer
+3. Context Manager (`harness/` or `src/context/`)
+- Owns context budgeting, compaction, and retry-payload assembly.
+- Validates `previous_response_id` chain and persists it in deterministic state.
+- Enforces per-model token budgets and hard caps before any model call.
+- Emits structured metrics (truncation count, compaction events, dropped fields).
+- Exposes a deterministic API: `build_payload(phase, artifacts, errors, model_id) -> payload`.
+ - Emits logging per `docs/tech-spec/13-logging-and-observability/README.md`.
+
+4. Prompt + Schema + Parser Layer
 - Prompts define task intent constrained to schema.
 - Schemas define canonical phase outputs.
 - Parser/validators enforce semantic/runtime policy before artifacts are accepted.
 
-4. Scaffold and Scene Contract Layer
+5. Scaffold and Scene Contract Layer
 - Scaffold generator owns immutable scene structure and slot markers.
 - Generated content may only populate allowed slots.
 
-5. Voice Subsystem
+6. Voice Subsystem
 - Exposes one stable service interface (generate/cache/query duration).
 - Provider-specific adapters are isolated behind this interface.
 
-6. Render + Assembly Subsystem
+7. Render + Assembly Subsystem
 - Consumes validated scene + narration + audio artifacts.
 - No silent repair logic in final render stage.
 
@@ -60,6 +68,8 @@ Define WD’s core modules, boundaries, and ownership so implementation stays mo
 | L-005 | Prompt/schema/parser are treated as one contract surface. |
 | L-008 | Voice policy is frozen behind one adapter interface. |
 | L-010 | Runtime artifacts are decoupled from core component evolution. |
+| L-013 | Conversation chain is validated and persisted deterministically. |
+| L-014 | Retry payloads are size-bounded and compacted deterministically. |
 
 ## Open Questions
 
