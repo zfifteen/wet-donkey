@@ -44,11 +44,15 @@ Define WD’s core modules, boundaries, and ownership so implementation stays mo
 - Scaffold generator owns immutable scene structure and slot markers.
 - Generated content may only populate allowed slots.
 
-6. Voice Subsystem
+6. Helper API Registry (scene helpers)
+- Defines versioned helper signatures, allowed kwargs, and return types.
+- Exposed to the LLM via deterministic wrappers; helper misuse is rejected before runtime.
+
+7. Voice Subsystem
 - Exposes one stable service interface (generate/cache/query duration).
 - Provider-specific adapters are isolated behind this interface.
 
-7. Render + Assembly Subsystem
+8. Render + Assembly Subsystem
 - Consumes validated scene + narration + audio artifacts.
 - No silent repair logic in final render stage.
 
@@ -70,6 +74,7 @@ Define WD’s core modules, boundaries, and ownership so implementation stays mo
 | L-010 | Runtime artifacts are decoupled from core component evolution. |
 | L-013 | Conversation chain is validated and persisted deterministically. |
 | L-014 | Retry payloads are size-bounded and compacted deterministically. |
+| L-019 | Helper signatures and supported kwargs are versioned and enforced. |
 
 ## Open Questions
 

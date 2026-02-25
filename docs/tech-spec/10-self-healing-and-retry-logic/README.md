@@ -43,6 +43,7 @@ Repair prompts must include:
 - prior attempt delta summary,
 - applicable contract constraints.
  - If the full prior context is too large, the orchestrator must include a deterministic diff summary plus a pointer to the preserved full payload in logs/artifacts.
+ - Repair prompts must not introduce new tool requirements or annotations that are incompatible with the phase tool policy or output schema.
 
 ### Retry Payload Budgeting
 
@@ -87,6 +88,7 @@ Context truncation that removes required diagnostics is a retry-ineligible failu
 | L-005 | Retry prompts are generated from structured gate outputs. |
 | L-009 | Retry policy is integrated with validation ownership, not ad hoc. |
 | L-014 | Retry payloads are size-bounded against model context limits. |
+| L-017 | Retry prompts are rejected if they require unavailable tools or disallowed annotations. |
 
 ## Open Questions
 

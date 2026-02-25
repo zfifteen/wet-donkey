@@ -41,6 +41,7 @@ Define how WD integrates with the xAI Responses API in a stateful, schema-enforc
 - Allowed tools are phase-specific and explicitly declared.
 - Tool outputs are treated as evidence, not direct mutation authority.
 - Tool usage/citations are logged for audit and retry diagnostics.
+ - Prompt templates must declare required tools/capabilities; orchestration preflight must reject any prompt that requires tools not enabled for the phase.
 
 ### Error/Degradation Behavior
 
@@ -59,6 +60,7 @@ Define how WD integrates with the xAI Responses API in a stateful, schema-enforc
 | L-009 | Validation and tool evidence are first-class integration outputs. |
 | L-013 | Session continuation requires validated conversation pointers. |
 | L-014 | Per-model context limits are enforced before model calls. |
+| L-017 | Prompt/tool capability mismatches are blocked before model calls. |
 
 ## Open Questions
 

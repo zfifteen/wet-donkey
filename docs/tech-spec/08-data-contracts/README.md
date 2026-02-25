@@ -36,6 +36,26 @@ Define canonical data contracts across pipeline state, phase payloads, and gener
 - Prompts must target schema fields exactly (no parallel informal fields).
 - Schema changes require coordinated updates to prompt templates, parser logic, and tests.
 
+2.1 Prompt Capability Manifest (Draft)
+- Each prompt template includes a machine-readable capability manifest:
+  - `required_tools` (array)
+  - `allowed_tools` (array)
+  - `required_annotations` (array; for example citations)
+  - `output_restrictions` (array; for example "no comments")
+- Orchestrator must validate that required tools and annotations are compatible with phase tool policy and output schema.
+- If incompatible, phase fails closed before any model call.
+
+Example (Draft):
+```
+{
+  "prompt_id": "build_scenes_v1",
+  "required_tools": [],
+  "allowed_tools": [],
+  "required_annotations": [],
+  "output_restrictions": ["json_only", "no_comments", "no_code_fences"]
+}
+```
+
 3. Scene Scaffold Contract
 - Immutable slot markers define insertion boundaries.
 - Generator outputs only slot body content.
@@ -152,6 +172,7 @@ Validation Checklist (Draft)
 | L-007 | Contract docs are authoritative and must update with code. |
 | L-009 | Validation layers map to explicit contract ownership. |
 | L-010 | Runtime artifacts are separated from core contract definitions. |
+| L-017 | Prompt capability manifests are validated against tool policy and output restrictions. |
 
 ## Open Questions
 

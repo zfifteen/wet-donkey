@@ -29,6 +29,10 @@ Define a strict validation hierarchy that blocks invalid artifacts early and pre
 3. Semantic Gate (Domain rules)
 - Validates policy/business constraints (timing bounds, layout tag allowlist, helper usage).
 - Validates MathTex/LaTeX strings and Manim color literals before runtime execution.
+- Validates LaTeX escaping normalization (no double-escaped sequences in raw strings).
+- Validates helper signatures and allowed kwargs via the helper registry.
+- Validates Manim API kwargs against a version-locked allowlist for scene primitives.
+- Validates plot callback compatibility (must accept scalar input for `Axes.plot`).
 - Failure outcome: reject output, retry eligible with semantic diff guidance.
 
 4. Runtime Gate (Execution checks)
@@ -66,6 +70,8 @@ Define a strict validation hierarchy that blocks invalid artifacts early and pre
 | L-004 | Scaffold boundary integrity is enforced at the Contract Gate. |
 | L-011 | MathTex/LaTeX validity is enforced before runtime render. |
 | L-012 | Manim color literals are validated to prevent runtime type errors. |
+| L-018 | LaTeX escaping is normalized and validated before runtime render. |
+| L-019 | Helper/API kwargs are validated against a version-locked surface. |
 
 ## Open Questions
 

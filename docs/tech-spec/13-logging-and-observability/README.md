@@ -39,6 +39,7 @@ Define observability standards that make WD failures diagnosable at the source a
 
 5. Artifact lineage log
 - Inputs/outputs and version hashes per phase artifact.
+ - Prompt capability manifest snapshot per phase attempt (required tools/annotations vs allowed).
 
 ### Correlation and Identity
 

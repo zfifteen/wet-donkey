@@ -41,6 +41,10 @@ Define a test strategy that validates WD contracts early, prevents regressions d
 - Retry-context preservation and truncation handling.
 - MathTex/LaTeX validity checks for generated formulas.
 - Manim color literal validation (reject non-color types).
+- Prompt/tool capability compatibility checks (required tools/annotations vs phase policy).
+- LaTeX escaping normalization (reject double-escaped sequences).
+- Helper signature validation and API kwargs allowlist enforcement.
+- Plot callback scalar-compatibility checks for `Axes.plot`.
 
 ### CI Policy
 
@@ -63,6 +67,9 @@ Define a test strategy that validates WD contracts early, prevents regressions d
 | L-005 | Prompt/schema/parser alignment is tested automatically. |
 | L-006 | Small milestone slices are validated with focused test gates. |
 | L-007 | Spec updates require matching test updates for affected contracts. |
+| L-017 | Prompt/tool compatibility is tested before model calls. |
+| L-018 | LaTeX escaping normalization has dedicated regression tests. |
+| L-019 | Helper signature and API kwargs validation are regression-tested. |
 
 ## Open Questions
 
