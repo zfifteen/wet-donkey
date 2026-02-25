@@ -45,6 +45,7 @@ Define a test strategy that validates WD contracts early, prevents regressions d
 - LaTeX escaping normalization (reject double-escaped sequences).
 - Helper signature validation and API kwargs allowlist enforcement.
 - Plot callback scalar-compatibility checks for `Axes.plot`.
+- Dashed-line rendering tests to ensure `stroke_dash` is rejected and `DashedVMobject` is accepted.
 
 ### CI Policy
 

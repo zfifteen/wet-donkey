@@ -33,6 +33,7 @@ Define a strict validation hierarchy that blocks invalid artifacts early and pre
 - Validates helper signatures and allowed kwargs via the helper registry.
 - Validates Manim API kwargs against a version-locked allowlist for scene primitives.
 - Validates plot callback compatibility (must accept scalar input for `Axes.plot`).
+- Explicitly rejects unsupported styling kwargs (for example `stroke_dash`) and requires dashed-line primitives (`DashedVMobject`) instead.
 - Failure outcome: reject output, retry eligible with semantic diff guidance.
 
 4. Runtime Gate (Execution checks)

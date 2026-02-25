@@ -44,6 +44,7 @@ Repair prompts must include:
 - applicable contract constraints.
  - If the full prior context is too large, the orchestrator must include a deterministic diff summary plus a pointer to the preserved full payload in logs/artifacts.
  - Repair prompts must not introduce new tool requirements or annotations that are incompatible with the phase tool policy or output schema.
+ - For repeated failure classes, repair prompts must include failure-specific remediation directives (for example “normalize LaTeX escaping in raw MathTex strings”) and a required checklist of edits to avoid repeating the same error.
 
 ### Retry Payload Budgeting
 
@@ -89,6 +90,7 @@ Context truncation that removes required diagnostics is a retry-ineligible failu
 | L-009 | Retry policy is integrated with validation ownership, not ad hoc. |
 | L-014 | Retry payloads are size-bounded against model context limits. |
 | L-017 | Retry prompts are rejected if they require unavailable tools or disallowed annotations. |
+| L-020 | Repair prompts include failure-specific remediation directives for repeated errors. |
 
 ## Open Questions
 
