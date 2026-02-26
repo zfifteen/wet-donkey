@@ -39,6 +39,7 @@ Define WD’s core modules, boundaries, and ownership so implementation stays mo
 - Prompts define task intent constrained to schema.
 - Schemas define canonical phase outputs.
 - Parser/validators enforce semantic/runtime policy before artifacts are accepted.
+- Plan normalization/linting rejects code-like API tokens in `visual_ideas` and enforces intent-only planning.
 
 5. Scaffold and Scene Contract Layer
 - Scaffold generator owns immutable scene structure and slot markers.
@@ -75,6 +76,7 @@ Define WD’s core modules, boundaries, and ownership so implementation stays mo
 | L-013 | Conversation chain is validated and persisted deterministically. |
 | L-014 | Retry payloads are size-bounded and compacted deterministically. |
 | L-019 | Helper signatures and supported kwargs are versioned and enforced. |
+| L-022 | Plan outputs are linted to prevent invalid API leakage into build. |
 
 ## Open Questions
 

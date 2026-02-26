@@ -36,6 +36,11 @@ Define canonical data contracts across pipeline state, phase payloads, and gener
 - Prompts must target schema fields exactly (no parallel informal fields).
 - Schema changes require coordinated updates to prompt templates, parser logic, and tests.
 
+2.1 Plan Schema Constraints (Draft)
+- `visual_ideas` must be intent-level natural language or constrained tags, not executable Manim API calls.
+- Any structured tags or tokens must come from a versioned allowlist (for example `intent:highlight`, `intent:transform`).
+- If raw Manim API tokens appear, the plan is rejected before build.
+
 2.1 Prompt Capability Manifest (Draft)
 - Each prompt template includes a machine-readable capability manifest:
   - `required_tools` (array)
@@ -173,6 +178,7 @@ Validation Checklist (Draft)
 | L-009 | Validation layers map to explicit contract ownership. |
 | L-010 | Runtime artifacts are separated from core contract definitions. |
 | L-017 | Prompt capability manifests are validated against tool policy and output restrictions. |
+| L-022 | Plan schema forbids raw Manim API tokens; intent-only planning is enforced. |
 
 ## Open Questions
 

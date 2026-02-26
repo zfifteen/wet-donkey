@@ -48,6 +48,8 @@ Define a test strategy that validates WD contracts early, prevents regressions d
 - Dashed-line rendering tests to ensure `stroke_dash` is rejected and `DashedVMobject` is accepted.
 - Camera capability tests to ensure moving-camera APIs are rejected unless explicitly enabled.
 - Axis config allowlist tests to reject unsupported keys.
+- Plan lint tests to reject raw Manim API tokens inside `visual_ideas`.
+- MathTex subobject access tests to reject numeric indexing and require `get_part_by_tex`.
 
 ### CI Policy
 
@@ -74,6 +76,8 @@ Define a test strategy that validates WD contracts early, prevents regressions d
 | L-018 | LaTeX escaping normalization has dedicated regression tests. |
 | L-019 | Helper signature and API kwargs validation are regression-tested. |
 | L-021 | Plot callbacks are validated for scalar safety. |
+| L-022 | Plan lint prevents invalid Manim API leakage into build. |
+| L-023 | MathTex subobject access is validated for safe selectors. |
 
 ## Open Questions
 

@@ -28,6 +28,10 @@ Primary goal: extract lessons from FH failures and use them to build WD correctl
 - Correlate conversation log findings to `build.log` and `error.log` failure modes.
 - Convert evidence into concrete lessons and update prevention status in `docs/lessons-learned/flaming-horse-lessons.md`.
 
+## Phase 2 Completion Note (2026-02-26)
+
+- Completed instruction-quality vs output analysis for all FH runs (gibbs-phenomenon, smoke-test, smoke-test-1, topic-1, topic-2-failed) with lessons L-013 through L-023 captured and spec/test guardrails updated.
+
 ## Repositories and Roles
 
 - Wet Donkey (implementation target): `/Users/velocityworks/IdeaProjects/wet-donkey`

@@ -32,10 +32,12 @@ Define a strict validation hierarchy that blocks invalid artifacts early and pre
 - Validates LaTeX escaping normalization (no double-escaped sequences in raw strings).
 - Validates helper signatures and allowed kwargs via the helper registry.
 - Validates Manim API kwargs against a version-locked allowlist for scene primitives.
+- Validates plan `visual_ideas` are intent-only and reject raw Manim API tokens outside allowlists.
 - Validates plot callback compatibility (must accept scalar input for `Axes.plot`).
 - Explicitly rejects unsupported styling kwargs (for example `stroke_dash`) and requires dashed-line primitives (`DashedVMobject`) instead.
 - Validates camera capability assumptions (for example disallow `self.camera.frame` unless the scene scaffold declares a moving camera).
 - Validates axis config keys against a version-locked allowlist (reject `include_numbers`, `numbers_with_elongated_ticks` unless supported).
+- Validates MathTex subobject access patterns (reject numeric indexing like `tex_obj[2]`; require `get_part_by_tex`).
 - Failure outcome: reject output, retry eligible with semantic diff guidance.
 
 4. Runtime Gate (Execution checks)
@@ -76,6 +78,8 @@ Define a strict validation hierarchy that blocks invalid artifacts early and pre
 | L-018 | LaTeX escaping is normalized and validated before runtime render. |
 | L-019 | Helper/API kwargs are validated against a version-locked surface. |
 | L-021 | Plot callbacks are scalar-safe or wrapped before runtime. |
+| L-022 | Plan lint rejects invalid Manim API tokens before build. |
+| L-023 | MathTex subobject access is constrained to safe selectors. |
 
 ## Open Questions
 
