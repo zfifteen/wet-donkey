@@ -1,8 +1,8 @@
 # Flaming Horse Analysis Execution Plan
 
-Status: draft (execution not started)  
-Last updated: 2026-02-24  
-Phase alignment: Canonical game plan step 1 (deep FH analysis)
+Status: complete for current audited FH run set (execution cycle finished)  
+Last updated: 2026-02-26  
+Phase alignment: Canonical game plan step 1 (deep FH analysis), currently closed for this cycle
 
 ## 1) Objective
 
@@ -141,8 +141,8 @@ At session end:
 - Update lessons status and spec impacts.
 - Record next highest-priority unanswered analysis question.
 
-## 11) Immediate Next Actions (Not Executed Yet)
+## 11) Immediate Next Actions (If Analysis Is Reopened)
 
-- Review and approve this execution plan.
-- Select first execution slice (recommended order: WS3 -> WS2 -> WS4 -> WS1 -> WS5).
-- Open a cycle-1 analysis report file under `docs/analysis/` using the finding template.
+- Confirm a new FH audit scope (runs, PR window, or subsystem focus) before reopening workstreams.
+- Select next execution slice based on unresolved Phase 3 questions.
+- Open a new analysis cycle report under `docs/analysis/` using the finding template.

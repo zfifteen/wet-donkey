@@ -118,6 +118,7 @@ At session end:
 - Revised tech spec: `docs/tech-spec/`
 - Revised implementation plan: `docs/implementation-plan/README.md`
 - Legacy plan (non-canonical): `docs/legacy/WET_DONKEY_IMPLEMENTATION_PLAN.md`
+- GitHub CLI assumption: `gh` is always available and authenticated in this workspace.
 
 ## 9) File Size and Structure Guardrail
 
