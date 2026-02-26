@@ -35,7 +35,7 @@ Define deterministic render and assembly behavior so final output quality is rep
 
 ### Output Verification
 
-- Verify final file exists, duration is within expected tolerance, and manifest completeness is satisfied.
+- Verify final file exists, duration is within expected tolerance, and manifest coverage requirements are satisfied.
 - Assembly success is not declared without verification pass.
 
 ### Lessons Traceability

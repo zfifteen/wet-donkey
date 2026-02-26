@@ -1,45 +1,33 @@
 # AGENTS.md
 
-This document defines the operating game plan for AI agents working in Wet Donkey (WD).
+Wet Donkey (WD) agent control spec.
+This file is a compact, durable coordination contract, not a historical log.
 
-## Mission
+## 1) Mission
 
-Wet Donkey is a clean, fresh re-implementation of Flaming Horse (FH), not a continuation of FH's evolving/spaghetti architecture.
+Wet Donkey is a clean re-implementation of Flaming Horse (FH), built from first principles.
+WD must apply FH lessons without inheriting FH architecture/sprawl.
 
-Primary goal: extract lessons from FH failures and use them to build WD correctly from first principles.
+## 2) State Snapshot (Overwrite-Only)
 
-## Repository Context
+As of: 2026-02-26
 
-- GitHub repository: `https://github.com/zfifteen/wet-donkey` (public)
-- Production Python source root: `src/`
-- Canonical harness module: `src/harness/` (xAI Responses API)
-- Runtime artifacts: `projects/` (gitignored)
+- Current phase: Phase 3 (revised tech spec finalization and approval)
+- Next phase: Phase 4 (revised implementation plan), pending explicit Phase 3 approval
+- Phase status flags:
+  - P1 FH analysis: complete for current audited FH run set
+  - P2 lessons learned: complete for current scope (L-013 through L-023 captured)
+  - P3 revised tech spec: draft coverage present, finalization/approval pending
+  - P4 revised implementation plan: drafted, not active until Phase 3 approval
+  - P5 implementation: pending
+- Current blockers:
+  - Resolve Phase 3 open questions and approve Phase 3 exit criteria
+- Next concrete action:
+  - Finalize and approve Phase 3 in `docs/tech-spec/` per explicit exit criteria
 
-## Current Status
+Rule: this snapshot is updated in place. Never append timeline entries here.
 
-- Phase 1 (FH analysis): in progress, focusing on runtime artifacts and logs in `docs/analysis/fh-pr-audit/flaming-horse-generated`
-- Phase 2 (lessons learned): active and populated in `docs/lessons-learned/flaming-horse-lessons.md`
-- Phase 3 (revised WD tech spec): draft coverage completed in `docs/tech-spec/`
-- Phase 4 (revised WD implementation plan): next active deliverable
-
-## Current Phase 2 Scope (Active)
-
-- Continue FH generated-runs analysis with emphasis on `conversation.log` context continuity.
-- Correlate conversation log findings to `build.log` and `error.log` failure modes.
-- Convert evidence into concrete lessons and update prevention status in `docs/lessons-learned/flaming-horse-lessons.md`.
-
-## Phase 2 Completion Note (2026-02-26)
-
-- Completed instruction-quality vs output analysis for all FH runs (gibbs-phenomenon, smoke-test, smoke-test-1, topic-1, topic-2-failed) with lessons L-013 through L-023 captured and spec/test guardrails updated.
-
-## Repositories and Roles
-
-- Wet Donkey (implementation target): `/Users/velocityworks/IdeaProjects/wet-donkey`
-- Flaming Horse (analysis source): `/Users/velocityworks/IdeaProjects/flaming-horse`
-
-FH is studied for lessons only. WD is where new architecture/spec/implementation are authored.
-
-## Canonical Game Plan (Do Not Reorder)
+## 3) Canonical Game Plan (Do Not Reorder)
 
 1. Continue deep analysis of FH implementation.
 2. Produce a formal lessons-learned document in WD.
@@ -47,97 +35,110 @@ FH is studied for lessons only. WD is where new architecture/spec/implementation
 4. Revise WD implementation plan using the revised spec.
 5. Execute WD implementation against the revised plan.
 
-If work requests conflict with this sequence, pause and explicitly call out the conflict.
+If requested work conflicts with this order, call out the conflict explicitly.
 
-## Current Documentation Baseline
+## 4) State Authority and Drift Rules
 
-- Existing (legacy draft): `docs/legacy/WET_DONKEY_IMPLEMENTATION_PLAN.md`
-- New wiki-style spec scaffold: `docs/tech-spec/`
-- Lessons learned index: `docs/lessons-learned/README.md`
-- FH analysis log: `docs/lessons-learned/flaming-horse-lessons.md`
-- FH PR audit evidence: `docs/analysis/fh-pr-audit/`
-- Revised implementation plan destination: `docs/implementation-plan/README.md` (create/update here)
+Precedence for phase/state truth:
 
-The wiki under `docs/tech-spec/` is the destination for the revised tech spec. Do not treat the old implementation plan as final truth.
+1. `AGENTS.md` State Snapshot (Section 2)
+2. `docs/implementation-plan/README.md` current canonical phase
+3. `docs/lessons-learned/flaming-horse-lessons.md` lesson/status evidence
+4. `docs/tech-spec/` section status and contracts
 
-## Non-Negotiable Operating Rules
+If any contradiction is found:
 
-- WD must remain a clean re-implementation; avoid copying FH architecture blindly.
-- Every major WD design choice should trace to either:
+1. Stop and identify the mismatch.
+2. Update `AGENTS.md` snapshot in the same session.
+3. Update the conflicting canonical doc if needed.
+4. Do not end session with unresolved state contradictions.
+
+## 5) WD Non-Negotiables
+
+- WD remains a clean re-implementation; do not copy FH architecture blindly.
+- Every major WD design choice must map to:
   - an FH lesson learned, or
-  - an explicit WD-first rationale documented in spec.
-- The LLM is not the orchestrator in WD. It is constrained to content-generation responsibilities only.
-- Deterministic code owns infrastructure responsibilities: file writes/mutations, phase advancement, retries/escalation, validation/policy enforcement, and state persistence.
-- Avoid hidden complexity and "self-heal loop" dependence as a design crutch.
-- No architecture pivots without updating spec docs first.
-- Prefer deterministic state handling and explicit contracts over implicit behavior.
-- Keep docs and implementation in sync; flag drift immediately.
-- WD has one harness module only (`src/harness/`); do not reintroduce dual-harness architecture.
+  - a WD-first rationale documented in spec.
+- The LLM is not the orchestrator.
+- Deterministic code owns:
+  - file writes/mutations
+  - phase advancement
+  - retries/escalation
+  - validation/policy enforcement
+  - state persistence
+- Avoid hidden complexity and self-heal loops as a design crutch.
+- No architecture pivots without spec updates first.
+- Prefer explicit contracts and deterministic state handling.
+- Keep docs and implementation synchronized; flag and fix drift immediately.
+- WD has one harness module only: `src/harness/`.
 
-## Required Deliverables by Phase
+## 6) Phase Deliverables (Definition-Level)
 
-### Phase 1: FH Analysis
+Phase 1: FH Analysis
+- Produce concrete findings: failure patterns, root causes, anti-patterns, tooling/process gaps.
 
-Produce concrete findings (not impressions):
-- Failure patterns
-- Root causes
-- Architectural anti-patterns
-- Process/tooling gaps
+Phase 2: Lessons Learned
+- Maintain WD-local lessons with what failed, why, WD prevention, and status.
 
-### Phase 2: Lessons Learned Document
+Phase 3: Revised Tech Spec
+- Populate `docs/tech-spec/` with boundaries, data/state contracts, validation gates, retry/error policy, observability, and tests.
 
-Create and maintain a WD-local lessons artifact that includes:
-- What failed in FH
-- Why it failed
-- How WD will prevent recurrence
-- Status of whether the prevention is implemented, planned, or pending
+Phase 4: Revised Implementation Plan
+- Maintain `docs/implementation-plan/README.md` with spec-derived milestones, acceptance criteria, and testability at each milestone.
 
-### Phase 3: Revised WD Tech Spec
+Phase 5: Implementation
+- Execute milestones with contract/tests/docs alignment and lessons traceability.
 
-Populate `docs/tech-spec/` section-by-section with:
-- explicit boundaries
-- data/state contracts
-- validation gates
-- error/retry policy
-- observability and test strategy
+## 7) Session Control Loop
 
-### Phase 4: Revised WD Implementation Plan
+At session start:
 
-Update/replace implementation planning in `docs/implementation-plan/README.md` so it is:
-- derived from the revised tech spec
-- sequenced by milestones
-- testable at each milestone
-- clear on acceptance criteria
-
-## Daily Anti-Drift Workflow
-
-At start of each work session:
-1. Re-state mission and current phase.
-2. Confirm today's tasks map to canonical game plan.
-3. Identify any drift between code and docs.
-4. Execute scoped work.
-5. Record what changed and what phase is next.
-
-At end of each session:
-- Update this AGENTS.md if goals/constraints changed.
-- Update relevant spec/lessons docs to keep alignment current.
-
-## Definition of Done for "Planning Foundation"
-
-The planning foundation is complete only when all are true:
-- FH lessons are documented clearly in WD.
-- Revised tech spec in `docs/tech-spec/` is complete enough to implement from.
-- Revised implementation plan is aligned to that spec.
-- Open risks and unknowns are explicitly tracked.
-
-## Instructions to Future Agents
-
-If you start with no prior context:
 1. Read this file first.
-2. Read `docs/lessons-learned/README.md` and `docs/lessons-learned/flaming-horse-lessons.md`.
-3. Read `docs/analysis/fh-pr-audit/` evidence artifacts as needed.
-4. Read `docs/tech-spec/README.md` and section drafts/status.
-5. Read the current implementation plan in `docs/implementation-plan/README.md` (or create it if absent).
-6. Propose work only within the current phase of the canonical game plan.
+2. Confirm Section 2 snapshot still matches canonical docs.
+3. Restate mission + current phase.
+4. Map proposed work to canonical game plan.
 
-When uncertain, optimize for architectural clarity, maintainability, and documented rationale over speed.
+During session:
+
+1. Keep work within current phase scope unless explicitly reprioritized.
+2. Tie major design decisions to lesson IDs or WD-first rationale.
+3. Fix state/document drift immediately when detected.
+
+At session end:
+
+1. Update Section 2 snapshot (overwrite only).
+2. Update affected canonical docs.
+3. Record unresolved risks/unknowns in canonical docs (not here).
+
+## 8) Documentation Baseline
+
+- Lessons index: `docs/lessons-learned/README.md`
+- Lessons log: `docs/lessons-learned/flaming-horse-lessons.md`
+- FH audit evidence: `docs/analysis/fh-pr-audit/`
+- Revised tech spec: `docs/tech-spec/`
+- Revised implementation plan: `docs/implementation-plan/README.md`
+- Legacy plan (non-canonical): `docs/legacy/WET_DONKEY_IMPLEMENTATION_PLAN.md`
+
+## 9) File Size and Structure Guardrail
+
+- Target max length: 200 lines.
+- This file must stay declarative and compact.
+- Additions must replace/consolidate existing content, not append historical narrative.
+- Historical evidence belongs in canonical docs, not `AGENTS.md`.
+
+## 10) Glossary (Execution and Control)
+
+- Active phase: the only phase that may receive execution work in the current session.
+- Approved: explicit sign-off state for a phase or spec section; required before phase advancement.
+- Blocker: a condition that prevents phase advancement until resolved.
+- Canonical docs: authoritative project-control documents (`AGENTS.md`, tech spec, lessons log, implementation plan).
+- Drift: contradiction between control docs, spec, and/or implementation state.
+- Exit criteria: required conditions that must be satisfied before a phase can be approved.
+- Finalization: converting draft coverage into approved, implementable guidance.
+- Gate: mandatory decision/validation checkpoint that controls progression.
+- In scope: work allowed under the current active phase.
+- Next phase: the immediate phase that follows the active phase once exit criteria are approved.
+- Phase advancement: explicit change of active phase after gate/approval conditions are met.
+- Prepared: drafted and available, but not yet active for execution.
+- State snapshot: overwrite-only control block in this file defining current phase truth.
+- Status flags: per-phase state markers used for quick control-plane interpretation.

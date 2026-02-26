@@ -2,6 +2,24 @@
 
 This wiki is the canonical technical specification for Wet Donkey.
 
+## Phase 3 Exit Criteria
+
+Phase 3 is approved only when all are true:
+
+1. Every section under `docs/tech-spec/*/README.md` is marked `Status: approved` (not `draft`/`stub`).
+2. Section `Open Questions` are either:
+   - resolved into `Decisions`, or
+   - explicitly deferred with owner and milestone in `docs/implementation-plan/README.md`.
+3. Required Phase 3 scope is covered with implementable specificity:
+   - explicit boundaries,
+   - data/state contracts,
+   - validation gates,
+   - error/retry policy,
+   - observability strategy,
+   - test strategy.
+4. Lessons traceability is present for major design decisions.
+5. `AGENTS.md` State Snapshot is updated to indicate Phase 3 approved and Phase 4 active.
+
 ## Navigation
 
 1. [01 Overview](./01-overview/README.md)
@@ -26,4 +44,4 @@ This wiki is the canonical technical specification for Wet Donkey.
 
 ## Source
 
-Primary source outline: `docs/legacy/WET_DONKEY_IMPLEMENTATION_PLAN.md`
+Legacy reference only: `docs/legacy/WET_DONKEY_IMPLEMENTATION_PLAN.md`

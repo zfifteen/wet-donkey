@@ -46,7 +46,7 @@ Define a strict validation hierarchy that blocks invalid artifacts early and pre
 
 5. Assembly Gate (Final package integrity)
 - Validates expected final outputs and metadata completeness.
-- Failure outcome: block completion and mark phase `blocked` if non-recoverable.
+- Failure outcome: block phase advancement and mark phase `blocked` if non-recoverable.
 
 ### Gate Rules
 

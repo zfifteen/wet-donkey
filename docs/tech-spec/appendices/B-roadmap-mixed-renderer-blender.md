@@ -40,7 +40,7 @@ Example intent:
 
 ## Entry Criteria to Start Implementation (Post-v1)
 
-- WD v1 contracts and milestones are complete and stable.
+- WD v1 contracts and milestones are approved and stable.
 - No unresolved high-severity contract-drift risks in current WD stack.
 - Renderer extension contracts are spec-reviewed and test strategy is defined.
 - Dependency and CI implications (for example Blender install/runtime) are approved.

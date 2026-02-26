@@ -19,7 +19,7 @@ Define a stable harness exit-code contract so orchestrator behavior is determini
 
 | Code | Category | Meaning | Orchestrator Action |
 |---|---|---|---|
-| 0 | Success | Phase completed with valid structured output/artifacts | Advance phase |
+| 0 | Success | Phase finished with valid structured output/artifacts | Advance phase |
 | 1 | Infrastructure/Execution Error | API/network/runtime/system failure | Retry if budget remains; otherwise block |
 | 2 | Semantic/Contract Validation Error | Output structurally valid but violates contract/semantic rules | Retry with failure context |
 | 3 | Schema Violation | Output failed schema contract | Retry with schema diagnostics; escalate on repeated same signature |

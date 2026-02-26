@@ -52,7 +52,7 @@ Purpose: review and approve the M0 scope before any implementation execution beg
 
 ## Review and Approval Gate (Before Execution)
 
-- [ ] Reviewer confirms M0 checklist completeness.
+- [ ] Reviewer confirms M0 checklist coverage.
 - [ ] Reviewer approves moving from planning to M0 execution.
 - [ ] Open risks impacting M0 are acknowledged and tracked.
 - [ ] Any non-M0 requested work is deferred or explicitly re-scoped.

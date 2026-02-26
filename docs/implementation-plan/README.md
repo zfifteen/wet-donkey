@@ -1,18 +1,25 @@
 # Wet Donkey Revised Implementation Plan
 
-Status: draft  
-Last updated: 2026-02-24  
-Current canonical phase: Phase 4 (revised implementation plan)  
+Status: draft (prepared; not active)  
+Last updated: 2026-02-26  
+Current canonical phase: Phase 3 (revised tech spec finalization)  
 Plan source of truth: `docs/tech-spec/` + `docs/lessons-learned/flaming-horse-lessons.md`
 
 ## 1) Session Start Alignment (Anti-Drift)
 
 - Mission restatement: WD remains a clean re-implementation of FH, with deterministic contracts and no dual-harness regression.
-- Current phase restatement: Phase 4 deliverable is this revised implementation plan, derived from completed Phase 3 tech spec draft and active lessons log.
+- Current phase restatement: Phase 3 is active until tech spec finalization/approval is granted; this Phase 4 plan is prepared but gated.
 - Canonical game-plan alignment: this document executes step 4 without reordering steps 1-3.
-- Drift snapshot (as of 2026-02-24):
+- Drift snapshot (as of 2026-02-26):
   - `docs/implementation-plan/README.md` did not exist; created in this session.
-  - Tech spec and lessons exist and are populated; implementation plan now catches documentation structure up to current phase.
+  - Tech spec and lessons exist and are populated; implementation plan is drafted and pending Phase 3 approval to become active.
+
+## 1.1) Phase Gate
+
+Phase 4 activation condition:
+
+- This plan remains `prepared` until Phase 3 is explicitly marked approved.
+- Do not begin Phase 5 implementation work while any Phase 3 section remains draft-unapproved.
 
 ## 2) Planning Principles
 
@@ -201,7 +208,7 @@ Primary lessons covered: L-003, L-006, L-007, L-009, L-010.
 
 ### M7 - Execution Readiness Gate (Phase 5 Entry)
 
-Goal: verify planning foundation completion and authorize implementation acceleration.
+Goal: verify planning foundation readiness and authorize implementation acceleration.
 
 Work items:
 - Confirm planning foundation definition-of-done conditions are satisfied.
@@ -215,7 +222,7 @@ Acceptance criteria:
 
 Required tests/gates:
 - Documentation consistency check.
-- Risk register completeness check.
+- Risk register coverage check.
 - Final milestone readiness review.
 
 Primary lessons covered: all lessons (L-001..L-010), with emphasis on governance consistency.
@@ -242,9 +249,9 @@ For each milestone, produce:
 
 | Risk ID | Risk | Impact | Mitigation | Owner | Status |
 |---|---|---|---|---|---|
-| R-001 | Contract freeze incomplete before implementation expansion | High regression/churn risk | Complete M0 before opening broader feature work | WD Team | open |
+| R-001 | Contract freeze unresolved before implementation expansion | High regression/churn risk | Finish M0 before opening broader feature work | WD Team | open |
 | R-002 | Retry budgets undefined by phase | Loop and blocked-state inconsistency | Define phase budgets in M1/M4 and codify tests | WD Team | open |
-| R-003 | Prompt/schema/parser alignment automation incomplete | High parse/contract failure recurrence | Deliver M3 CI alignment gates before broad generator changes | WD Team | open |
+| R-003 | Prompt/schema/parser alignment automation unresolved | High parse/contract failure recurrence | Deliver M3 CI alignment gates before broad generator changes | WD Team | open |
 | R-004 | Voice fallback policy ambiguity | Runtime nondeterminism in narration stages | Lock explicit fallback policy during M5 | WD Team | open |
 | R-005 | Docs/code drift under execution pressure | Architectural divergence | Enforce docs-as-gate in M6 CI policy | WD Team | open |
 
@@ -271,8 +278,8 @@ For each milestone, produce:
 | L-009 | 01, 05, 08, 09, 10, 13, 18 | M0, M1, M3, M4, M6 |
 | L-010 | 04, 13, 16, 17 | M5, M6 |
 
-## 10) Session End Log (Anti-Drift)
+## 10) Session State Snapshot (Anti-Drift)
 
 - Created: `docs/implementation-plan/README.md`.
-- Phase progression: Phase 4 deliverable drafted and aligned to current spec + lessons.
-- Next phase/action: begin milestone execution (Phase 5) only after reviewing and approving this plan and resolving highest-priority open decisions.
+- Phase state: Phase 4 plan is drafted and aligned to current spec + lessons, but remains gated.
+- Next action: finalize and approve Phase 3 tech spec, then activate this Phase 4 plan.

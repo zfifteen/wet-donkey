@@ -136,7 +136,7 @@ main() {
     
     # If a phase handler succeeded, we might want to automatically run the next one
     # This can be added later to make the pipeline more automated.
-    log_info "Phase '$phase' completed."
+    log_info "Phase '$phase' finished."
 }
 
 # --- Entrypoint ---

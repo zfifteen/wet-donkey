@@ -18,14 +18,14 @@ In scope:
 Out of scope:
 - Implementing WD architecture changes directly during this analysis step.
 - Rewriting FH as a solution path.
-- Expanding WD implementation work before analysis outputs are complete.
+- Expanding WD implementation work before analysis outputs are finalized.
 
 ## 3) Analysis Questions (Must Answer)
 
 - Which FH failure classes recur and why?
 - Which failures are contract/design failures vs execution/infrastructure failures?
 - Which failure classes are blocked by spec-only controls vs code+test controls?
-- Which WD spec sections still contain open decisions because FH evidence is incomplete?
+- Which WD spec sections still contain open decisions because FH evidence is unresolved?
 - What is the minimum guardrail set required to prevent repeat FH failures in WD?
 
 ## 4) Evidence Sources
@@ -120,9 +120,9 @@ Required deliverables for this analysis cycle:
 - Spec gap/decision list identifying what blocks final WD tech spec signoff.
 - Proposed WD guardrail updates traceable to evidence.
 
-## 9) Exit Criteria (Analysis Complete)
+## 9) Exit Criteria (Analysis Approved)
 
-Analysis plan execution is complete only when all are true:
+Analysis plan execution is approved only when all are true:
 - All five workstreams have at least one validated output artifact.
 - Every high-severity finding has a mapped WD prevention strategy.
 - Open WD tech spec decisions are reduced to a bounded list with explicit owners.
@@ -137,7 +137,7 @@ At session start:
 - Confirm tasks do not skip ahead into implementation execution.
 
 At session end:
-- Record completed workstream progress.
+- Record finalized workstream progress.
 - Update lessons status and spec impacts.
 - Record next highest-priority unanswered analysis question.
 

@@ -9,7 +9,7 @@ Define a stable voice synthesis policy that guarantees deterministic behavior an
 ## Scope
 
 - Voice service interface contract.
-- Cache behavior and completeness requirements.
+- Cache behavior and coverage requirements.
 - Fallback/degraded behavior policy.
 - Validation and observability expectations.
 

@@ -27,7 +27,7 @@ Define how WD integrates with the xAI Responses API in a stateful, schema-enforc
 
 - Session initialized per project with versioned metadata.
 - Each phase invocation may continue prior response context if contract checks pass.
-- Session updates happen only on successful harness completion.
+- Session updates happen only after a successful harness response.
  - Context Manager enforces per-model payload budgets and validates `previous_response_id` before any continuation.
 
 ### Structured Output Contract

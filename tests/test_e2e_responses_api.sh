@@ -40,7 +40,7 @@ fi
 log_info "Running build_video.sh to initialize project and generate plan..."
 bash "${ROOT_DIR}/scripts/build_video.sh" "$PROJECT_NAME" --topic "$TOPIC"
 
-# 3. Verify that the 'plan' phase completed
+# 3. Verify that the 'plan' phase finished
 # The script will exit at the 'review' phase, so we check if the state was advanced to 'review'
 CURRENT_PHASE=$(python3.13 "${ROOT_DIR}/scripts/update_project_state.py" get --project-dir "$PROJECT_DIR" --key phase)
 if [[ "$CURRENT_PHASE" != "review" ]]; then
@@ -58,5 +58,5 @@ fi
 log_info "Plan was successfully generated with title: '$PLAN_TITLE'"
 
 # --- Success ---
-log_info "E2E test completed successfully!"
+log_info "E2E test finished successfully!"
 exit 0
