@@ -47,6 +47,7 @@ Define a test strategy that validates WD contracts early, prevents regressions d
 - Plot callback scalar-compatibility checks for `Axes.plot`.
 - Dashed-line rendering tests to ensure `stroke_dash` is rejected and `DashedVMobject` is accepted.
 - Camera capability tests to ensure moving-camera APIs are rejected unless explicitly enabled.
+- Axis config allowlist tests to reject unsupported keys.
 
 ### CI Policy
 
@@ -72,6 +73,7 @@ Define a test strategy that validates WD contracts early, prevents regressions d
 | L-017 | Prompt/tool compatibility is tested before model calls. |
 | L-018 | LaTeX escaping normalization has dedicated regression tests. |
 | L-019 | Helper signature and API kwargs validation are regression-tested. |
+| L-021 | Plot callbacks are validated for scalar safety. |
 
 ## Open Questions
 
