@@ -53,3 +53,9 @@ Date: 2026-03-01
 - L-007: canonical docs are now an explicit gate for contract-touching changes.
 - L-009: validation ownership/gate context is emitted as structured observability metadata.
 - L-010: blocked trace bundles and artifact pointers make runtime lineage explicit and auditable.
+
+## Policy Revision Note (2026-03-01)
+
+- GitHub CI is intentionally retired for the current WD version.
+- `.github/workflows/ci.yml` was removed as part of the Phase 5 local-gates transition.
+- Contract/docs enforcement continues through local/manual gates, primarily `scripts/run_phase5_local_gates.sh`.

@@ -70,10 +70,11 @@ class PipelineTrainingSession:
         else:
             resolved_schema = response_format
 
-        tools = [
-            collections_search(collection_ids=self.collection_ids),
-            code_execution()
-        ]
+        training_corpus_enabled = os.getenv("FH_ENABLE_TRAINING_CORPUS", "1") == "1"
+        tools = [code_execution()]
+
+        if training_corpus_enabled:
+            tools.insert(0, collections_search(collection_ids=self.collection_ids))
 
         # Add web search for research phases
         if phase in ["plan", "narration"]:

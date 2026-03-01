@@ -36,7 +36,7 @@ Phase 5 activation condition:
 
 - Freeze implementable WD v1 contracts from current approved tech-spec baseline.
 - Sequence WD implementation into testable milestones with acceptance criteria.
-- Define CI/test gates per milestone.
+- Define local/manual test gates per milestone.
 - Track open risks/unknowns explicitly.
 
 ### Out of Scope (for this plan phase)
@@ -126,7 +126,7 @@ Work items:
 - Introduce prompt manifest contract per phase (declared variables + schema map).
 - Enforce strict variable validation before model invocation.
 - Align parser validators to canonical schema versions.
-- Implement CI alignment checks (prompt fields <-> schema fields <-> parser).
+- Implement local alignment checks (prompt fields <-> schema fields <-> parser).
 
 Acceptance criteria:
 - Undeclared/missing template variables fail fast.
@@ -135,7 +135,7 @@ Acceptance criteria:
 
 Required tests/gates:
 - Prompt manifest validation tests.
-- Prompt-schema-parser alignment CI check.
+- Prompt-schema-parser alignment local gate check.
 - Regression tests for known FH drift cases.
 
 Primary lessons covered: L-005, L-007, L-009.
@@ -184,7 +184,7 @@ Required tests/gates:
 
 Primary lessons covered: L-002, L-008, L-009, L-010.
 
-### M6 - Observability, Risk Controls, and CI Enforcement
+### M6 - Observability, Risk Controls, and Local Gate Enforcement
 
 Goal: make failures diagnosable and enforce anti-drift governance.
 
@@ -197,12 +197,12 @@ Work items:
 Acceptance criteria:
 - Each phase attempt is traceable with run and attempt IDs.
 - Blocked runs produce actionable diagnostics.
-- CI enforces contract-critical suites and alignment checks.
+- Local gates enforce contract-critical suites and alignment checks.
 
 Required tests/gates:
 - Logging schema tests.
 - End-to-end traceability tests for failed and successful runs.
-- CI policy checks for docs/spec alignment on contract-touching changes.
+- Local docs-as-gate checks for docs/spec alignment on contract-touching changes.
 
 Primary lessons covered: L-003, L-006, L-007, L-009, L-010.
 
@@ -251,9 +251,9 @@ For each milestone, produce:
 |---|---|---|---|---|---|
 | R-001 | Contract freeze unresolved before implementation expansion | High regression/churn risk | Phase 3 approved; M0 contract freeze planning deliverables completed; execute M0 implementation gates first in Phase 5 | WD Team | mitigated |
 | R-002 | Retry budgets undefined by phase | Loop and blocked-state inconsistency | Defaults locked in tech spec; codify and test in M1/M4 | WD Team | mitigated |
-| R-003 | Prompt/schema/parser alignment automation unresolved | High parse/contract failure recurrence | M3 alignment gates are active and enforced in CI baseline (`check_prompt_schema_alignment.py`) | WD Team | mitigated |
+| R-003 | Prompt/schema/parser alignment automation unresolved | High parse/contract failure recurrence | M3 alignment gates are active and enforced in local baseline (`check_prompt_schema_alignment.py`) | WD Team | mitigated |
 | R-004 | Voice fallback policy ambiguity | Runtime nondeterminism in narration stages | Policy locked in tech spec; enforced in M5 implementation and contract tests | WD Team | mitigated |
-| R-005 | Docs/code drift under execution pressure | Architectural divergence | Docs-as-gate policy enforced via `scripts/check_docs_as_gate.py` and CI workflow | WD Team | mitigated |
+| R-005 | Docs/code drift under execution pressure | Architectural divergence | Docs-as-gate policy enforced via `scripts/check_docs_as_gate.py` and local gate runner (`scripts/run_phase5_local_gates.sh`) | WD Team | mitigated |
 
 ## 8) Locked Decisions from Phase 3 Finalization
 
@@ -282,7 +282,7 @@ For each milestone, produce:
 
 - Created: `docs/implementation-plan/README.md`.
 - Phase state: Phase 4 complete; plan approved as the active execution baseline for Phase 5.
-- Next action: implement remaining Phase 5 runtime handlers (`narration`, `build_scenes`, `scene_qc`) under the enforced contract/observability gates.
+- Next action: validate the `FH_ENABLE_TRAINING_CORPUS=1` path with a dedicated `XAI_MANAGEMENT_API_KEY`, then remove dependence on temporary training-corpus-disabled live smoke mode.
 
 ## 11) Phase 4 Completion Record
 
@@ -294,6 +294,8 @@ For each milestone, produce:
 - M4 evidence: `docs/implementation-plan/M4-evidence.md`
 - M5 evidence: `docs/implementation-plan/M5-evidence.md`
 - M6 evidence: `docs/implementation-plan/M6-evidence.md`
+- Phase 5 fixture e2e evidence: `docs/implementation-plan/phase5-fixture-e2e-evidence.md`
+- Phase 5 local gates/no-CI evidence: `docs/implementation-plan/phase5-local-gates-no-ci-evidence.md`
 - M1-M7 checklists: `docs/implementation-plan/milestone-checklists.md`
 - Phase 5 kickoff checklist: `docs/implementation-plan/phase5-kickoff-checklist.md`
 - Readiness decision: Phase 5 kickoff approved on 2026-03-01.

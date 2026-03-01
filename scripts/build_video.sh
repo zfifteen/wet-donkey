@@ -12,9 +12,9 @@ PHASE_HANDLER_TABLE=$(cat <<'EOF'
 init:handle_init
 plan:handle_plan
 review:handle_review
-narration:handle_unimplemented
-build_scenes:handle_unimplemented
-scene_qc:handle_unimplemented
+narration:handle_narration
+build_scenes:handle_build_scenes
+scene_qc:handle_scene_qc
 precache_voiceovers:handle_precache_voiceovers
 final_render:handle_final_render
 assemble:handle_assemble
@@ -252,13 +252,40 @@ EOF
   return 1
 }
 
+write_disabled_collections_metadata() {
+  local metadata_file="$PROJECT_DIR/.collections_metadata.json"
+  cat > "$metadata_file" <<EOF
+{
+  "contract_version": "1.0.0",
+  "template_collection_id": "disabled-template-collection",
+  "project_collection_id": "disabled-project-collection",
+  "documents": [],
+  "updated_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+}
+EOF
+}
+
 # --- Phase Handlers ---
 
 handle_init() {
   log_info "Initializing project and training corpus..."
+  local project_bootstrapped="false"
 
   if [ ! -d "$PROJECT_DIR" ]; then
     run_with_failure_policy "project initialization" "$SCRIPT_DIR/new_project.sh" "$PROJECT_NAME" --topic "$TOPIC"
+    project_bootstrapped="true"
+  fi
+
+  if [[ "$project_bootstrapped" = "true" ]] && [[ -n "${CURRENT_PHASE_ATTEMPT:-}" ]]; then
+    emit_phase_event "phase_start" "$CURRENT_PHASE_ATTEMPT" "phase start after project bootstrap"
+  fi
+
+  local training_corpus_enabled="${FH_ENABLE_TRAINING_CORPUS:-1}"
+  if [[ "$training_corpus_enabled" != "1" ]]; then
+    log_info "Training corpus initialization is disabled (FH_ENABLE_TRAINING_CORPUS=${training_corpus_enabled})."
+    write_disabled_collections_metadata
+    advance_phase "plan"
+    return 0
   fi
 
   if [[ -z "${XAI_MANAGEMENT_API_KEY:-}" ]]; then
@@ -310,6 +337,234 @@ handle_review() {
   echo "python3.13 scripts/update_project_state.py set --project-dir \"$PROJECT_DIR\" --key phase --value narration"
   echo
   return 0
+}
+
+handle_narration() {
+  log_info "Generating narration artifacts..."
+  if [[ -z "${XAI_API_KEY:-}" ]]; then
+    record_phase_failure \
+      "POLICY_VIOLATION" \
+      "XAI_API_KEY is required for narration phase" \
+      "contract" \
+      "orchestrator" \
+      "false" \
+      "true"
+    return 1
+  fi
+
+  run_with_failure_policy "narration generation" \
+    "$PYTHON_CMD" -m harness.cli \
+    --phase "narration" \
+    --project-dir "$PROJECT_DIR"
+
+  run_with_failure_policy "scene manifest preparation" \
+    "$PYTHON_CMD" "$SCRIPT_DIR/runtime_phase_contracts.py" \
+    prepare-scene-manifest \
+    --project-dir "$PROJECT_DIR"
+
+  run_with_failure_policy "scene scaffold preparation" \
+    "$PYTHON_CMD" "$SCRIPT_DIR/runtime_phase_contracts.py" \
+    scaffold-scenes \
+    --project-dir "$PROJECT_DIR"
+
+  advance_phase "build_scenes"
+}
+
+handle_build_scenes() {
+  log_info "Generating scene code for all manifest scenes..."
+  if [[ -z "${XAI_API_KEY:-}" ]]; then
+    record_phase_failure \
+      "POLICY_VIOLATION" \
+      "XAI_API_KEY is required for build_scenes phase" \
+      "contract" \
+      "orchestrator" \
+      "false" \
+      "true"
+    return 1
+  fi
+
+  local manifest_path="$PROJECT_DIR/artifacts/scene_manifest.json"
+  if [ ! -f "$manifest_path" ]; then
+    record_phase_failure \
+      "POLICY_VIOLATION" \
+      "scene manifest not found at $manifest_path; narration phase must run first" \
+      "contract" \
+      "orchestrator" \
+      "false" \
+      "true"
+    return 1
+  fi
+
+  run_with_failure_policy "scene scaffold consistency" \
+    "$PYTHON_CMD" "$SCRIPT_DIR/runtime_phase_contracts.py" \
+    scaffold-scenes \
+    --project-dir "$PROJECT_DIR"
+
+  local scene_ids_file
+  scene_ids_file=$(mktemp)
+  run_with_failure_policy "scene id extraction" \
+    jq -r '.scenes[].scene_id' "$manifest_path" >"$scene_ids_file"
+
+  if [ ! -s "$scene_ids_file" ]; then
+    rm -f "$scene_ids_file"
+    record_phase_failure \
+      "VALIDATION_ERROR" \
+      "scene manifest contains no scenes: $manifest_path" \
+      "contract" \
+      "orchestrator" \
+      "false" \
+      "true"
+    return 1
+  fi
+
+  local scene_id
+  while IFS= read -r scene_id; do
+    [ -n "$scene_id" ] || continue
+
+    local scene_payload_file
+    scene_payload_file=$(mktemp)
+    run_with_failure_policy "scene spec resolution $scene_id" \
+      "$PYTHON_CMD" "$SCRIPT_DIR/runtime_phase_contracts.py" \
+      print-scene-spec \
+      --project-dir "$PROJECT_DIR" \
+      --scene-id "$scene_id" >"$scene_payload_file"
+
+    local scene_file_rel_file
+    scene_file_rel_file=$(mktemp)
+    local scene_spec_json_file
+    scene_spec_json_file=$(mktemp)
+    run_with_failure_policy "scene file extraction $scene_id" \
+      jq -r '.scene_file' "$scene_payload_file" >"$scene_file_rel_file"
+    run_with_failure_policy "scene spec extraction $scene_id" \
+      jq -c '.scene_spec' "$scene_payload_file" >"$scene_spec_json_file"
+
+    local scene_file_rel
+    scene_file_rel=$(cat "$scene_file_rel_file")
+    local scene_spec_json
+    scene_spec_json=$(cat "$scene_spec_json_file")
+    rm -f "$scene_file_rel_file" "$scene_spec_json_file"
+    rm -f "$scene_payload_file"
+
+    if [ -z "$scene_file_rel" ] || [ "$scene_file_rel" = "null" ] || [ -z "$scene_spec_json" ] || [ "$scene_spec_json" = "null" ]; then
+      rm -f "$scene_ids_file"
+      record_phase_failure \
+        "VALIDATION_ERROR" \
+        "scene spec payload invalid for $scene_id" \
+        "contract" \
+        "orchestrator" \
+        "false" \
+        "true"
+      return 1
+    fi
+
+    run_with_failure_policy "scene build $scene_id" \
+      "$PYTHON_CMD" -m harness.cli \
+      --phase "build_scenes" \
+      --project-dir "$PROJECT_DIR" \
+      --scene-file "$PROJECT_DIR/$scene_file_rel" \
+      --scene-spec "$scene_spec_json"
+  done <"$scene_ids_file"
+  rm -f "$scene_ids_file"
+
+  run_with_failure_policy "scene build contract validation" \
+    "$PYTHON_CMD" "$SCRIPT_DIR/runtime_phase_contracts.py" \
+    validate-build-scenes \
+    --project-dir "$PROJECT_DIR"
+
+  advance_phase "scene_qc"
+}
+
+handle_scene_qc() {
+  log_info "Running scene QC for all manifest scenes..."
+  if [[ -z "${XAI_API_KEY:-}" ]]; then
+    record_phase_failure \
+      "POLICY_VIOLATION" \
+      "XAI_API_KEY is required for scene_qc phase" \
+      "contract" \
+      "orchestrator" \
+      "false" \
+      "true"
+    return 1
+  fi
+
+  local manifest_path="$PROJECT_DIR/artifacts/scene_manifest.json"
+  if [ ! -f "$manifest_path" ]; then
+    record_phase_failure \
+      "POLICY_VIOLATION" \
+      "scene manifest not found at $manifest_path; narration phase must run first" \
+      "contract" \
+      "orchestrator" \
+      "false" \
+      "true"
+    return 1
+  fi
+
+  local scene_ids_file
+  scene_ids_file=$(mktemp)
+  run_with_failure_policy "scene id extraction for qc" \
+    jq -r '.scenes[].scene_id' "$manifest_path" >"$scene_ids_file"
+
+  if [ ! -s "$scene_ids_file" ]; then
+    rm -f "$scene_ids_file"
+    record_phase_failure \
+      "VALIDATION_ERROR" \
+      "scene manifest contains no scenes: $manifest_path" \
+      "contract" \
+      "orchestrator" \
+      "false" \
+      "true"
+    return 1
+  fi
+
+  local scene_id
+  while IFS= read -r scene_id; do
+    [ -n "$scene_id" ] || continue
+
+    local scene_payload_file
+    scene_payload_file=$(mktemp)
+    run_with_failure_policy "scene path resolution $scene_id" \
+      "$PYTHON_CMD" "$SCRIPT_DIR/runtime_phase_contracts.py" \
+      print-scene-spec \
+      --project-dir "$PROJECT_DIR" \
+      --scene-id "$scene_id" >"$scene_payload_file"
+
+    local scene_file_rel_file
+    scene_file_rel_file=$(mktemp)
+    run_with_failure_policy "scene path extraction $scene_id" \
+      jq -r '.scene_file' "$scene_payload_file" >"$scene_file_rel_file"
+
+    local scene_file_rel
+    scene_file_rel=$(cat "$scene_file_rel_file")
+    rm -f "$scene_file_rel_file"
+    rm -f "$scene_payload_file"
+
+    if [ -z "$scene_file_rel" ] || [ "$scene_file_rel" = "null" ]; then
+      rm -f "$scene_ids_file"
+      record_phase_failure \
+        "VALIDATION_ERROR" \
+        "scene path payload invalid for $scene_id" \
+        "contract" \
+        "orchestrator" \
+        "false" \
+        "true"
+      return 1
+    fi
+
+    run_with_failure_policy "scene qc $scene_id" \
+      "$PYTHON_CMD" -m harness.cli \
+      --phase "scene_qc" \
+      --project-dir "$PROJECT_DIR" \
+      --scene-id "$scene_id" \
+      --scene-file "$PROJECT_DIR/$scene_file_rel"
+  done <"$scene_ids_file"
+  rm -f "$scene_ids_file"
+
+  run_with_failure_policy "scene qc contract validation" \
+    "$PYTHON_CMD" "$SCRIPT_DIR/runtime_phase_contracts.py" \
+    validate-scene-qc \
+    --project-dir "$PROJECT_DIR"
+
+  advance_phase "precache_voiceovers"
 }
 
 handle_precache_voiceovers() {
@@ -413,6 +668,7 @@ main() {
   prior_attempt_count=$(echo "$attempt_counters_json" | jq -r --arg phase "$CURRENT_PHASE" '.[$phase] // 0' 2>/dev/null || echo "0")
   local phase_attempt
   phase_attempt=$((prior_attempt_count + 1))
+  CURRENT_PHASE_ATTEMPT="$phase_attempt"
 
   log_info "Current project phase is: $CURRENT_PHASE (status=$phase_status)"
 

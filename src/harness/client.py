@@ -3,16 +3,18 @@ from pathlib import Path
 
 from xai_sdk.chat import user
 
-from .session import PipelineTrainingSession
-from .prompts import compose_prompts
-from .schemas.plan import Plan
-from .schemas import get_schema_for_phase
 from .parser import (
     validate_phase_payload,
     validate_timing_execution,
 )
+from .prompts import compose_prompts
+from .schemas import get_schema_for_phase
+from .schemas.narration import Narration
+from .schemas.plan import Plan
+from .schemas.scene_qc import SceneQC
+from .session import PipelineTrainingSession
 
-def generate_plan(session: PipelineTrainingSession, topic: str, retry_context: str = None):
+def generate_plan(session: PipelineTrainingSession, topic: str, retry_context: str | None = None) -> Plan:
     """Generate structured plan with API-enforced schema"""
     
     prompts = compose_prompts("00_plan", topic=topic, retry_context=retry_context)
@@ -31,7 +33,7 @@ def generate_plan(session: PipelineTrainingSession, topic: str, retry_context: s
     
     return plan
 
-def generate_scene(session: PipelineTrainingSession, scene_spec: dict, retry_context: str = None):
+def generate_scene(session: PipelineTrainingSession, scene_spec: dict, retry_context: str | None = None):
     """Generates the Manim code for a single scene."""
 
     prompts = compose_prompts(
@@ -84,17 +86,46 @@ def repair_scene(session: PipelineTrainingSession, scene_file: str, failure_reas
 
     return scene_repair
 
-# Placeholder for other phases mentioned in the spec
-def generate_narration(session: PipelineTrainingSession, plan: Plan):
-    """Placeholder function to generate narration script."""
-    print("Generating narration...")
-    # In a real implementation, this would call the xAI API
-    # with prompts from '02_narration'
-    pass
 
-def run_scene_qc(session: PipelineTrainingSession, scene_file: str):
-    """Placeholder function to run Quality Control on a scene."""
-    print(f"Running QC on {scene_file}...")
-    # In a real implementation, this would call the xAI API
-    # with prompts from '05_scene_qc'
-    pass
+def generate_narration(
+    session: PipelineTrainingSession,
+    plan: Plan,
+) -> Narration:
+    """Generate narration script for all plan scenes."""
+    prompts = compose_prompts(
+        "02_narration",
+        plan=plan.model_dump(mode="json"),
+    )
+
+    chat = session.create_chat(
+        phase="narration",
+        response_format=get_schema_for_phase("narration"),
+    )
+    chat.append(user(prompts["system"], prompts["user"]))
+    response = chat.sample()
+
+    narration = validate_phase_payload("narration", response.content)
+    session.update_response_id(response.id)
+    return narration
+
+
+def run_scene_qc(
+    session: PipelineTrainingSession,
+    scene_file: str,
+) -> SceneQC:
+    """Run scene quality checks and return structured QC result."""
+    prompts = compose_prompts(
+        "05_scene_qc",
+        scene_code=Path(scene_file).read_text(encoding="utf-8"),
+    )
+
+    chat = session.create_chat(
+        phase="scene_qc",
+        response_format=get_schema_for_phase("scene_qc"),
+    )
+    chat.append(user(prompts["system"], prompts["user"]))
+    response = chat.sample()
+
+    scene_qc = validate_phase_payload("scene_qc", response.content)
+    session.update_response_id(response.id)
+    return scene_qc

@@ -46,15 +46,12 @@ This project uses the xAI Responses API for stateful, multi-turn conversations, 
     ```
 
 2.  **Set up the environment:**
-    Create a `.env` file by copying the example file:
+    Bootstrap `.env` from the Flaming Horse workspace (reuses compatible keys and fills WD defaults):
     ```bash
-    cp .env.example .env
+    python3.13 scripts/bootstrap_env_from_fh.py
     ```
-    Edit the `.env` file and add your xAI API keys:
-    ```
-    XAI_API_KEY="YOUR_XAI_API_KEY"
-    XAI_MANAGEMENT_API_KEY="YOUR_XAI_MANAGEMENT_API_KEY"
-    ```
+    This writes `.env` and adds a TODO above `XAI_MANAGEMENT_API_KEY` when it is temporarily reusing `XAI_API_KEY`.
+    You can also create `.env` manually from `.env.example` if needed.
 
 3.  **Install dependencies:**
     A `requirements.txt` file should be created. Install it using pip:
@@ -76,6 +73,20 @@ The main entrypoint to the pipeline is the `create_video.sh` script.
 The script will initialize the project, create the necessary training collections via the API, and generate a video plan.
 
 The pipeline has a manual approval gate after the planning phase. To continue the process, you must manually advance the state as instructed by the script output.
+
+## Local Quality Gates
+
+GitHub CI is intentionally disabled for the current version. All quality enforcement is local/manual.
+
+Run deterministic gates:
+```bash
+./scripts/run_phase5_local_gates.sh
+```
+
+Include manual live API smoke:
+```bash
+./scripts/run_phase5_local_gates.sh --with-live-api
+```
 
 ## Directory Structure
 

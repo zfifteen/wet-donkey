@@ -2,6 +2,7 @@
 import argparse
 import os
 import json
+from inspect import signature
 from pathlib import Path
 from datetime import datetime, timezone
 from xai_sdk import Client
@@ -13,6 +14,15 @@ def utc_timestamp() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
+def create_collection_compat(client: Client, name: str, description: str):
+    """Create a collection across xai_sdk versions with/without description support."""
+    create_params = signature(client.collections.create).parameters
+    kwargs = {"name": name}
+    if "description" in create_params:
+        kwargs["description"] = description
+    return client.collections.create(**kwargs)
+
+
 def initialize_training_corpus(project_dir: str, project_name: str, template_collection_id: str = None):
     """Create Collections for template library and scene examples"""
     project_dir = Path(project_dir)
@@ -21,7 +31,11 @@ def initialize_training_corpus(project_dir: str, project_name: str, template_col
         print("Warning: XAI_MANAGEMENT_API_KEY is not set. Skipping collection creation.")
         return
 
-    client = Client(api_key=management_api_key)
+    try:
+        client = Client(management_api_key=management_api_key)
+    except TypeError:
+        # Backward compatibility with SDK versions that only expose `api_key`.
+        client = Client(api_key=management_api_key)
 
     # 1. Template library collection
     if template_collection_id:
@@ -29,9 +43,10 @@ def initialize_training_corpus(project_dir: str, project_name: str, template_col
         template_collection_id = template_collection_id
     else:
         print("Creating new template collection: 'wet-donkey-templates'")
-        template_collection = client.collections.create(
+        template_collection = create_collection_compat(
+            client=client,
             name="wet-donkey-templates",
-            description="Kitchen sink patterns, scene helpers, visual reference docs for Wet Donkey"
+            description="Kitchen sink patterns, scene helpers, visual reference docs for Wet Donkey",
         )
         template_collection_id = template_collection.collection_id
         print(f"Created template collection with ID: {template_collection_id}")
@@ -44,9 +59,10 @@ def initialize_training_corpus(project_dir: str, project_name: str, template_col
     # 2. Project-specific collection
     project_collection_name = f"{project_name}-scenes"
     print(f"Creating project-specific collection: '{project_collection_name}'")
-    project_collection = client.collections.create(
+    project_collection = create_collection_compat(
+        client=client,
         name=project_collection_name,
-        description=f"Generated scene files and QC reports for project {project_name}"
+        description=f"Generated scene files and QC reports for project {project_name}",
     )
     project_collection_id = project_collection.collection_id
     print(f"Created project collection with ID: {project_collection_id}")

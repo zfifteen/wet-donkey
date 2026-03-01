@@ -23,7 +23,7 @@ As of: 2026-03-01
 - Current blockers:
   - None for Phase 5 activation; implementation execution pending milestone-by-milestone delivery
 - Next concrete action:
-  - Implement remaining Phase 5 runtime handlers (`narration`, `build_scenes`, `scene_qc`) under enforced contract, retry, and observability gates
+  - Validate and document the `FH_ENABLE_TRAINING_CORPUS=1` path with a dedicated `XAI_MANAGEMENT_API_KEY`, then retire the temporary training-corpus-disabled live-smoke mode
 
 Rule: this snapshot is updated in place. Never append timeline entries here.
 
@@ -119,6 +119,7 @@ At session end:
 - Revised implementation plan: `docs/implementation-plan/README.md`
 - Legacy plan (non-canonical): `docs/legacy/WET_DONKEY_IMPLEMENTATION_PLAN.md`
 - Python runtime requirement: WD scripts/tests/tooling must run on `python3.13`; using `python3` or earlier runtimes is non-compliant.
+- Quality gate policy for current version: manual local gate execution only; GitHub CI/Actions workflows are deferred.
 - IntelliJ MCP is the default execution surface when available.
   - Prefer IntelliJ-native operations for project analysis, code search, inspections, semantic symbol lookups, refactors, formatting, builds, and run configurations.
   - Prefer IntelliJ inspection/build outputs over ad-hoc manual reasoning whenever equivalent IDE functionality exists.

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import pytest
 from pydantic import ValidationError
 
@@ -67,4 +68,23 @@ def test_validate_plan_payload_accepts_contract_shape() -> None:
         ],
     }
     result = validate_phase_payload("plan", payload)
+    assert isinstance(result, Plan)
+
+
+def test_validate_plan_payload_accepts_json_string() -> None:
+    payload = {
+        "title": "A topic",
+        "description": "desc",
+        "target_duration_seconds": 600,
+        "scenes": [
+            {
+                "title": f"Scene {index}",
+                "description": "desc",
+                "estimated_duration_seconds": 30,
+                "visual_ideas": ["idea"],
+            }
+            for index in range(1, 13)
+        ],
+    }
+    result = validate_phase_payload("plan", json.dumps(payload))
     assert isinstance(result, Plan)

@@ -10,7 +10,7 @@ Define a test strategy that validates WD contracts early, prevents regressions d
 
 - Test pyramid by layer (unit/integration/e2e/contract).
 - Required tests per phase and component.
-- CI gating and failure policy.
+- Local/manual gating and failure policy.
 - Regression strategy for lessons-derived risks.
 
 ## Design
@@ -51,11 +51,12 @@ Define a test strategy that validates WD contracts early, prevents regressions d
 - Plan lint tests to reject raw Manim API tokens inside `visual_ideas`.
 - MathTex subobject access tests to reject numeric indexing and require `get_part_by_tex`.
 
-### CI Policy
+### Local Gate Policy (v1)
 
 - Contract tests are mandatory on every change touching prompts/schemas/parser/orchestrator.
-- Failing tests block merge; no bypass for architecture-affecting changes.
+- Failing local gates block progression for this version; no bypass for architecture-affecting changes.
 - New lessons-derived guardrails require accompanying tests.
+- GitHub CI/Actions are intentionally deferred to a future version decision.
 
 ### Regression Strategy
 
@@ -87,7 +88,7 @@ Define a test strategy that validates WD contracts early, prevents regressions d
 
 - WD will prioritize contract and integration tests before expanding e2e scope.
 - Lessons-derived failure classes are tracked with explicit regression tests.
-- CI merge policy requires passing contract-critical suites.
+- Local gate policy requires passing contract-critical suites before proceeding.
 - Minimum v1 coverage targets are `>=85%` for contract-critical modules and explicit scenario coverage for each phase transition and retry/escalation branch.
-- Default CI executes deterministic contract/unit/integration suites plus one fixture-based e2e smoke path; full multi-topic e2e and live API suites run nightly.
-- Live API tests are isolated behind explicit markers and secrets gating, and they cannot silently replace deterministic CI baselines for merge decisions.
+- Default local gate execution runs deterministic contract/unit/integration suites plus one fixture-based e2e smoke path.
+- Live API smoke remains an explicit manual run with secrets gating and cannot replace deterministic local gate baselines.

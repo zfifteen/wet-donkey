@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from typing import Any
 
 from pydantic import ValidationError
@@ -36,6 +37,8 @@ def validate_phase_payload(phase: str, payload: Any):
     """
     validate_parser_schema_alignment()
     schema = get_schema_for_phase(phase)
+    if isinstance(payload, str):
+        payload = json.loads(payload)
     try:
         return schema.model_validate(payload)
     except ValidationError:
