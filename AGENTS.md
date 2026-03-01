@@ -23,7 +23,7 @@ As of: 2026-03-01
 - Current blockers:
   - None for Phase 5 activation; implementation execution pending milestone-by-milestone delivery
 - Next concrete action:
-  - Execute Phase 5 M4 (Validation Hierarchy and Retry Control): implement gate ordering, retry eligibility policy, and loop-risk detection
+  - Implement remaining Phase 5 runtime handlers (`narration`, `build_scenes`, `scene_qc`) under enforced contract, retry, and observability gates
 
 Rule: this snapshot is updated in place. Never append timeline entries here.
 

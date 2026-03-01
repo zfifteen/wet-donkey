@@ -15,9 +15,9 @@ review:handle_review
 narration:handle_unimplemented
 build_scenes:handle_unimplemented
 scene_qc:handle_unimplemented
-precache_voiceovers:handle_unimplemented
-final_render:handle_unimplemented
-assemble:handle_unimplemented
+precache_voiceovers:handle_precache_voiceovers
+final_render:handle_final_render
+assemble:handle_assemble
 complete:handle_complete
 EOF
 )
@@ -32,7 +32,7 @@ get_state() {
 }
 
 set_state() {
-  $PYTHON_CMD "$SCRIPT_DIR/update_project_state.py" set --project-dir "$PROJECT_DIR" --key "$1" --value "$2"
+  $PYTHON_CMD "$SCRIPT_DIR/update_project_state.py" set --project-dir "$PROJECT_DIR" --key "$1" --value "$2" --actor orchestrator
 }
 
 advance_phase() {
@@ -45,16 +45,57 @@ clear_phase_failures() {
   $PYTHON_CMD "$SCRIPT_DIR/update_project_state.py" clear-failures --project-dir "$PROJECT_DIR" --actor orchestrator >/dev/null
 }
 
+emit_phase_event() {
+  local event_type="$1"
+  local attempt="$2"
+  local message="${3:-}"
+  local next_action="${4:-}"
+
+  if [ ! -d "$PROJECT_DIR" ]; then
+    return 0
+  fi
+
+  local args=(
+    "$PYTHON_CMD" "$SCRIPT_DIR/update_project_state.py" log-event
+    --project-dir "$PROJECT_DIR"
+    --event-type "$event_type"
+    --phase "$CURRENT_PHASE"
+    --attempt "$attempt"
+    --actor orchestrator
+  )
+
+  if [ -n "$message" ]; then
+    args+=(--message "$message")
+  fi
+  if [ -n "$next_action" ]; then
+    args+=(--next-action "$next_action")
+  fi
+
+  "${args[@]}" >/dev/null
+}
+
 record_phase_failure() {
   local error_code="$1"
   local error_message="$2"
-  local force_block="${3:-false}"
+  local gate="${3:-runtime}"
+  local owner_component="${4:-orchestrator}"
+  local retryable="${5:-true}"
+  local force_block="${6:-false}"
+  local error_signature="${7:-}"
+  local attempt_delta="${8:-}"
+  local evidence_token="${9:-}"
 
   if [ "$force_block" = "true" ]; then
     $PYTHON_CMD "$SCRIPT_DIR/update_project_state.py" fail \
       --project-dir "$PROJECT_DIR" \
       --error-code "$error_code" \
       --error-message "$error_message" \
+      --gate "$gate" \
+      --owner-component "$owner_component" \
+      --retryable "$retryable" \
+      --error-signature "$error_signature" \
+      --attempt-delta "$attempt_delta" \
+      --evidence-token "$evidence_token" \
       --actor orchestrator \
       --force-block >/dev/null
   else
@@ -62,6 +103,12 @@ record_phase_failure() {
       --project-dir "$PROJECT_DIR" \
       --error-code "$error_code" \
       --error-message "$error_message" \
+      --gate "$gate" \
+      --owner-component "$owner_component" \
+      --retryable "$retryable" \
+      --error-signature "$error_signature" \
+      --attempt-delta "$attempt_delta" \
+      --evidence-token "$evidence_token" \
       --actor orchestrator >/dev/null
   fi
 
@@ -74,10 +121,67 @@ record_phase_failure() {
   return 1
 }
 
-is_retryable_exit_code() {
+schema_violation_retryable_for_phase() {
   case "$1" in
-    1|2|3) return 0 ;;
+    plan|narration|build_scenes|scene_qc) return 0 ;;
     *) return 1 ;;
+  esac
+}
+
+classify_exit_code() {
+  local rc="$1"
+  local phase="$2"
+
+  FAILURE_ERROR_CODE="INFRASTRUCTURE_ERROR"
+  FAILURE_GATE="runtime"
+  FAILURE_OWNER="harness"
+  FAILURE_RETRYABLE="true"
+  FAILURE_FORCE_BLOCK="false"
+
+  case "$rc" in
+    1)
+      FAILURE_ERROR_CODE="INFRASTRUCTURE_ERROR"
+      FAILURE_GATE="runtime"
+      FAILURE_OWNER="harness"
+      FAILURE_RETRYABLE="true"
+      ;;
+    2)
+      FAILURE_ERROR_CODE="VALIDATION_ERROR"
+      FAILURE_GATE="semantic"
+      FAILURE_OWNER="parser"
+      FAILURE_RETRYABLE="true"
+      ;;
+    3)
+      FAILURE_ERROR_CODE="SCHEMA_VIOLATION"
+      FAILURE_GATE="schema"
+      FAILURE_OWNER="harness"
+      if schema_violation_retryable_for_phase "$phase"; then
+        FAILURE_RETRYABLE="true"
+      else
+        FAILURE_RETRYABLE="false"
+      fi
+      ;;
+    4)
+      FAILURE_ERROR_CODE="POLICY_VIOLATION"
+      FAILURE_GATE="contract"
+      FAILURE_OWNER="orchestrator"
+      FAILURE_RETRYABLE="false"
+      FAILURE_FORCE_BLOCK="true"
+      ;;
+    5)
+      FAILURE_ERROR_CODE="MANUAL_GATE_REQUIRED"
+      FAILURE_GATE="assembly"
+      FAILURE_OWNER="orchestrator"
+      FAILURE_RETRYABLE="false"
+      FAILURE_FORCE_BLOCK="true"
+      ;;
+    *)
+      FAILURE_ERROR_CODE="INFRASTRUCTURE_ERROR"
+      FAILURE_GATE="runtime"
+      FAILURE_OWNER="harness"
+      FAILURE_RETRYABLE="false"
+      FAILURE_FORCE_BLOCK="true"
+      ;;
   esac
 }
 
@@ -95,23 +199,38 @@ run_with_failure_policy() {
     return 0
   fi
 
-  local error_code="INFRASTRUCTURE_ERROR"
-  local force_block="false"
-  case "$rc" in
-    2) error_code="VALIDATION_ERROR" ;;
-    3) error_code="SCHEMA_VIOLATION" ;;
-    4) error_code="POLICY_VIOLATION"; force_block="true" ;;
-    5) error_code="MANUAL_GATE_REQUIRED"; force_block="true" ;;
-  esac
+  classify_exit_code "$rc" "$CURRENT_PHASE"
 
   local msg="$description failed with exit code $rc"
-  if is_retryable_exit_code "$rc"; then
-    record_phase_failure "$error_code" "$msg" "$force_block" || return $? 
+  local signature="${CURRENT_PHASE}:${FAILURE_ERROR_CODE}:${description}"
+  local retry_delta="${WD_RETRY_DELTA:-}"
+  local evidence_token="${WD_RETRY_EVIDENCE_TOKEN:-}"
+
+  if [ "$FAILURE_RETRYABLE" = "true" ] && [ "$FAILURE_FORCE_BLOCK" != "true" ]; then
+    record_phase_failure \
+      "$FAILURE_ERROR_CODE" \
+      "$msg" \
+      "$FAILURE_GATE" \
+      "$FAILURE_OWNER" \
+      "$FAILURE_RETRYABLE" \
+      "$FAILURE_FORCE_BLOCK" \
+      "$signature" \
+      "$retry_delta" \
+      "$evidence_token" || return $?
     log_error "$msg"
     return "$rc"
   fi
 
-  record_phase_failure "$error_code" "$msg" "true" || return $?
+  record_phase_failure \
+    "$FAILURE_ERROR_CODE" \
+    "$msg" \
+    "$FAILURE_GATE" \
+    "$FAILURE_OWNER" \
+    "$FAILURE_RETRYABLE" \
+    "true" \
+    "$signature" \
+    "$retry_delta" \
+    "$evidence_token" || return $?
   log_error "$msg"
   return "$rc"
 }
@@ -143,7 +262,13 @@ handle_init() {
   fi
 
   if [[ -z "${XAI_MANAGEMENT_API_KEY:-}" ]]; then
-    record_phase_failure "POLICY_VIOLATION" "XAI_MANAGEMENT_API_KEY is required for init phase" true
+    record_phase_failure \
+      "POLICY_VIOLATION" \
+      "XAI_MANAGEMENT_API_KEY is required for init phase" \
+      "contract" \
+      "orchestrator" \
+      "false" \
+      "true"
     return 1
   fi
 
@@ -158,7 +283,13 @@ handle_init() {
 handle_plan() {
   log_info "Generating video plan..."
   if [[ -z "${XAI_API_KEY:-}" ]]; then
-    record_phase_failure "POLICY_VIOLATION" "XAI_API_KEY is required for plan phase" true
+    record_phase_failure \
+      "POLICY_VIOLATION" \
+      "XAI_API_KEY is required for plan phase" \
+      "contract" \
+      "orchestrator" \
+      "false" \
+      "true"
     return 1
   fi
 
@@ -181,8 +312,49 @@ handle_review() {
   return 0
 }
 
+handle_precache_voiceovers() {
+  log_info "Validating voice manifest and cached voiceover assets..."
+
+  run_with_failure_policy "voice manifest validation" \
+    "$PYTHON_CMD" "$SCRIPT_DIR/validate_media_pipeline.py" \
+    validate-voice-manifest \
+    --project-dir "$PROJECT_DIR"
+
+  advance_phase "final_render"
+}
+
+handle_final_render() {
+  log_info "Validating render preconditions..."
+
+  run_with_failure_policy "render preconditions validation" \
+    "$PYTHON_CMD" "$SCRIPT_DIR/validate_media_pipeline.py" \
+    validate-render-preconditions \
+    --project-dir "$PROJECT_DIR"
+
+  log_info "Render preconditions validated."
+  advance_phase "assemble"
+}
+
+handle_assemble() {
+  log_info "Validating assembly manifest and final output..."
+
+  run_with_failure_policy "assembly contract verification" \
+    "$PYTHON_CMD" "$SCRIPT_DIR/validate_media_pipeline.py" \
+    validate-assembly \
+    --project-dir "$PROJECT_DIR"
+
+  log_info "Assembly contracts validated."
+  advance_phase "complete"
+}
+
 handle_unimplemented() {
-  record_phase_failure "INFRASTRUCTURE_ERROR" "Phase '$CURRENT_PHASE' handler is not yet implemented" false
+  record_phase_failure \
+    "INFRASTRUCTURE_ERROR" \
+    "Phase '$CURRENT_PHASE' handler is not yet implemented" \
+    "runtime" \
+    "orchestrator" \
+    "true" \
+    "false"
   return 1
 }
 
@@ -194,7 +366,13 @@ handle_complete() {
 run_current_phase() {
   local handler
   if ! handler=$(resolve_phase_handler "$CURRENT_PHASE"); then
-    record_phase_failure "POLICY_VIOLATION" "Unknown phase: $CURRENT_PHASE" true
+    record_phase_failure \
+      "POLICY_VIOLATION" \
+      "Unknown phase: $CURRENT_PHASE" \
+      "contract" \
+      "orchestrator" \
+      "false" \
+      "true"
     return 1
   fi
 
@@ -229,14 +407,24 @@ main() {
   local phase_status
   phase_status=$(get_state "phase_status" || echo "active")
 
+  local attempt_counters_json
+  attempt_counters_json=$(get_state "attempt_counters" || echo "{}")
+  local prior_attempt_count
+  prior_attempt_count=$(echo "$attempt_counters_json" | jq -r --arg phase "$CURRENT_PHASE" '.[$phase] // 0' 2>/dev/null || echo "0")
+  local phase_attempt
+  phase_attempt=$((prior_attempt_count + 1))
+
   log_info "Current project phase is: $CURRENT_PHASE (status=$phase_status)"
 
   if [ "$phase_status" = "blocked" ]; then
+    emit_phase_event "phase_blocked" "$phase_attempt" "phase already blocked at entry" "resolve failure_context before resume"
     log_error "Current phase is blocked. Resolve failure_context then clear failures before resuming."
     exit 2
   fi
 
+  emit_phase_event "phase_start" "$phase_attempt"
   run_current_phase
+  emit_phase_event "phase_success" "$phase_attempt"
   log_info "Phase '$CURRENT_PHASE' finished."
 }
 

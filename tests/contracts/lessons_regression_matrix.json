@@ -1,0 +1,48 @@
+{
+  "L-003": [
+    {
+      "path": "tests/contracts/test_retry_blocking.py",
+      "test": "test_identical_signature_without_delta_blocks_retry_loop"
+    },
+    {
+      "path": "tests/contracts/test_observability_contract.py",
+      "test": "test_blocked_failure_exports_trace_bundle"
+    }
+  ],
+  "L-006": [
+    {
+      "path": "tests/contracts/test_docs_as_gate_cli.py",
+      "test": "test_docs_as_gate_fails_without_docs_for_contract_changes"
+    }
+  ],
+  "L-007": [
+    {
+      "path": "tests/contracts/test_docs_as_gate_cli.py",
+      "test": "test_docs_as_gate_passes_with_canonical_docs_update"
+    },
+    {
+      "path": "tests/contracts/test_prompt_schema_alignment_cli.py",
+      "test": "test_prompt_schema_alignment_script_passes"
+    }
+  ],
+  "L-009": [
+    {
+      "path": "tests/contracts/test_harness_exit_codes.py",
+      "test": "test_validation_gate_sequence_must_be_monotonic"
+    },
+    {
+      "path": "tests/contracts/test_media_pipeline_contracts.py",
+      "test": "test_render_preconditions_require_runtime_gate"
+    }
+  ],
+  "L-010": [
+    {
+      "path": "tests/contracts/test_media_pipeline_contracts.py",
+      "test": "test_assembly_verification_accepts_in_tolerance_output"
+    },
+    {
+      "path": "tests/contracts/test_observability_contract.py",
+      "test": "test_blocked_failure_exports_trace_bundle"
+    }
+  ]
+}

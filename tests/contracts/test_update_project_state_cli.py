@@ -47,6 +47,46 @@ def test_cli_phase_transition_validation_and_blocking(tmp_path) -> None:
     )
     assert ok.returncode == 0
 
+    start_event = subprocess.run(
+        [
+            sys.executable,
+            str(script),
+            "log-event",
+            "--project-dir",
+            str(project_dir),
+            "--event-type",
+            "phase_start",
+            "--phase",
+            "plan",
+            "--attempt",
+            "1",
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert start_event.returncode == 0
+
+    success_event = subprocess.run(
+        [
+            sys.executable,
+            str(script),
+            "log-event",
+            "--project-dir",
+            str(project_dir),
+            "--event-type",
+            "phase_success",
+            "--phase",
+            "plan",
+            "--attempt",
+            "1",
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert success_event.returncode == 0
+
     # Invalid transition plan -> build_scenes
     bad = subprocess.run(
         [
@@ -106,6 +146,17 @@ def test_cli_phase_transition_validation_and_blocking(tmp_path) -> None:
     payload = json.loads(state_file.read_text(encoding="utf-8"))
     assert payload["phase_status"] == "blocked"
 
+    events_path = project_dir / "log" / "events.jsonl"
+    assert events_path.exists()
+    events = [json.loads(line) for line in events_path.read_text(encoding="utf-8").splitlines() if line.strip()]
+    event_types = [event["event_type"] for event in events]
+    assert "phase_failure" in event_types
+    assert "phase_blocked" in event_types
+
+    trace_bundle_dir = project_dir / "log" / "trace-bundles"
+    trace_bundles = list(trace_bundle_dir.glob("blocked-*.json"))
+    assert trace_bundles
+
     clear = subprocess.run(
         [
             sys.executable,
@@ -125,3 +176,6 @@ def test_cli_phase_transition_validation_and_blocking(tmp_path) -> None:
     payload = json.loads(state_file.read_text(encoding="utf-8"))
     assert payload["phase_status"] == "active"
     assert payload["failure_context"] == {}
+
+    events = [json.loads(line) for line in events_path.read_text(encoding="utf-8").splitlines() if line.strip()]
+    assert any(event["event_type"] == "phase_unblocked" for event in events)

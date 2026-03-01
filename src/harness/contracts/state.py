@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import re
 from datetime import datetime, timezone
@@ -51,6 +52,8 @@ DEFAULT_MAX_ATTEMPTS: dict[PhaseName, int] = {
     "assemble": 2,
     "complete": 1,
 }
+
+LOOP_SIGNATURE_REPEAT_BLOCK_THRESHOLD = 2
 
 _TRANSITIONS: dict[PhaseName, tuple[PhaseName, ...]] = {
     "init": ("plan",),
@@ -225,11 +228,39 @@ def get_attempt_count(state: ProjectState, phase: PhaseName) -> int:
         return 0
 
 
+def normalize_error_signature(
+    *,
+    phase: PhaseName,
+    gate: str,
+    error_code: str,
+    error_message: str,
+) -> str:
+    raw = "|".join(
+        [
+            phase.strip().lower(),
+            gate.strip().lower(),
+            error_code.strip().upper(),
+            " ".join(error_message.strip().split()).lower(),
+        ]
+    )
+    return hashlib.sha256(raw.encode("utf-8")).hexdigest()
+
+
+def _is_non_empty(value: Optional[str]) -> bool:
+    return bool(value and value.strip())
+
+
 def record_phase_failure(
     state: ProjectState,
     *,
     error_code: str,
     error_message: str,
+    gate: str = "runtime",
+    owner_component: str = "orchestrator",
+    retryable: bool = True,
+    error_signature: Optional[str] = None,
+    attempt_delta: Optional[str] = None,
+    evidence_token: Optional[str] = None,
     max_attempts_by_phase: Optional[dict[PhaseName, int]] = None,
     actor: str = "orchestrator",
     force_block: bool = False,
@@ -247,12 +278,61 @@ def record_phase_failure(
     counters[phase] = attempt
     payload["attempt_counters"] = counters
 
-    blocked = force_block or attempt >= phase_limit
+    previous_failure = dict(payload.get("failure_context", {}))
+    previous_signature = previous_failure.get("error_signature")
+    signature = error_signature or normalize_error_signature(
+        phase=phase,
+        gate=gate,
+        error_code=error_code,
+        error_message=error_message,
+    )
+
+    same_signature_as_previous = bool(previous_signature) and previous_signature == signature
+    has_meaningful_delta = (
+        attempt == 1
+        or not same_signature_as_previous
+        or _is_non_empty(attempt_delta)
+        or _is_non_empty(evidence_token)
+    )
+    blind_retry = retryable and attempt > 1 and not has_meaningful_delta
+    loop_risk = (
+        retryable
+        and same_signature_as_previous
+        and not has_meaningful_delta
+        and attempt >= LOOP_SIGNATURE_REPEAT_BLOCK_THRESHOLD
+    )
+
+    blocked_reason: Optional[str] = None
+    if force_block:
+        blocked_reason = "FORCE_BLOCK"
+    elif not retryable:
+        blocked_reason = "NON_RETRYABLE_FAILURE"
+    elif blind_retry:
+        blocked_reason = "NO_NEW_EVIDENCE"
+    elif loop_risk:
+        blocked_reason = "LOOP_SIGNATURE_REPEAT"
+    elif attempt >= phase_limit:
+        blocked_reason = "RETRY_BUDGET_EXHAUSTED"
+
+    blocked = blocked_reason is not None
     payload["phase_status"] = "blocked" if blocked else "active"
     payload["failure_context"] = {
         "phase": phase,
+        "gate": gate,
+        "owner_component": owner_component,
         "error_code": error_code,
         "error_message": error_message,
+        "retryable": retryable,
+        "error_signature": signature,
+        "previous_error_signature": previous_signature,
+        "same_signature_as_previous": same_signature_as_previous,
+        "attempt_delta": attempt_delta,
+        "evidence_token": evidence_token,
+        "has_meaningful_delta": has_meaningful_delta,
+        "blind_retry": blind_retry,
+        "loop_risk": loop_risk,
+        "loop_signature_repeat_threshold": LOOP_SIGNATURE_REPEAT_BLOCK_THRESHOLD,
+        "blocked_reason": blocked_reason,
         "attempt": attempt,
         "max_attempts": phase_limit,
         "blocked": blocked,
@@ -264,7 +344,7 @@ def record_phase_failure(
             "phase": phase,
             "timestamp": utc_timestamp(),
             "actor": actor,
-            "reason": f"failure:{error_code}:attempt={attempt}",
+            "reason": f"failure:{gate}:{error_code}:attempt={attempt}",
         },
     ]
 

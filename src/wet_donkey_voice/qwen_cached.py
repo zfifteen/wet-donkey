@@ -1,58 +1,91 @@
-# wet_donkey_voice/qwen_cached.py
-import hashlib
+from __future__ import annotations
+
 from pathlib import Path
+from typing import Any, Literal, Mapping
+
+from .contracts import (
+    VoiceMetadata,
+    VoiceSynthesisResult,
+    build_voice_cache_key,
+    metadata_sidecar_path,
+    normalize_narration_text,
+    text_digest,
+    validate_voice_result,
+    write_metadata_sidecar,
+)
+
 
 class QwenCachedTTS:
-    """
-    A placeholder for a cached Text-to-Speech service using Qwen TTS.
-    
-    In a real implementation, this class would:
-    1. Take a text string as input.
-    2. Check if a cached audio file for this text already exists.
-    3. If not, call the Qwen TTS model to generate the audio.
-    4. Save the generated audio to the cache.
-    5. Return the path to the audio file and its duration.
-    """
-    def __init__(self, cache_dir: str = "projects/voice_cache"):
+    """Deterministic cached TTS adapter with explicit metadata contracts."""
+
+    def __init__(
+        self,
+        cache_dir: str = "projects/voice_cache",
+        *,
+        voice_id: str = "qwen-default",
+        synthesis_settings: Mapping[str, Any] | None = None,
+        fallback_enabled: bool = False,
+        audio_format: str = "mp3",
+        sample_rate_hz: int = 24000,
+        channels: int = 1,
+    ) -> None:
         self.cache_dir = Path(cache_dir)
         self.cache_dir.mkdir(parents=True, exist_ok=True)
-        print(f"TTS cache directory: {self.cache_dir.resolve()}")
 
-    def generate_audio(self, text: str):
-        """
-        Generates or retrieves cached audio for the given text.
-        """
-        # Create a unique file name based on the hash of the text
-        text_hash = hashlib.sha256(text.encode()).hexdigest()[:16]
-        file_path = self.cache_dir / f"{text_hash}.mp3"
+        self.voice_id = voice_id
+        self.synthesis_settings = dict(synthesis_settings or {})
+        self.fallback_enabled = fallback_enabled
+        self.audio_format = audio_format.lower().lstrip(".")
+        self.sample_rate_hz = sample_rate_hz
+        self.channels = channels
 
-        if file_path.exists():
-            print(f"Cache hit for TTS: '{text[:30]}...' -> {file_path}")
-            # In a real implementation, we would get the duration from the file
-            duration_seconds = self._get_mock_duration(text)
-            return str(file_path), duration_seconds
-        
-        print(f"Cache miss for TTS: '{text[:30]}...'")
-        print("Generating new audio file (mock)...")
-        
-        # --- MOCK IMPLEMENTATION ---
-        # This is where the actual call to the Qwen TTS model would happen.
-        # For now, we'll just create a dummy file.
-        file_path.touch()
-        duration_seconds = self._get_mock_duration(text)
-        print(f"Generated mock audio at {file_path}")
-        # ---------------------------
+    def synthesize(self, text: str, *, degraded: bool = False) -> VoiceSynthesisResult:
+        normalized_text = normalize_narration_text(text)
+        cache_key = build_voice_cache_key(
+            text=normalized_text,
+            voice_id=self.voice_id,
+            synthesis_settings=self.synthesis_settings,
+        )
+        audio_path = self.cache_dir / f"{cache_key}.{self.audio_format}"
 
-        return str(file_path), duration_seconds
+        generation_mode: Literal["cache_hit", "generated", "fallback_generated"]
+        if audio_path.exists() and not degraded:
+            generation_mode = "cache_hit"
+        else:
+            generation_mode = "fallback_generated" if degraded else "generated"
+            self._write_mock_audio(audio_path)
 
-    def _get_mock_duration(self, text: str) -> float:
-        """
-        A mock method to estimate audio duration.
-        A real implementation would use a library like `mutagen` to read
-        the actual duration from the audio file.
-        """
+        metadata = VoiceMetadata(
+            voice_id=self.voice_id,
+            cache_key=cache_key,
+            generation_mode=generation_mode,
+            degraded=degraded,
+            duration_seconds=self._estimate_duration_seconds(normalized_text),
+            audio_format=self.audio_format,
+            sample_rate_hz=self.sample_rate_hz,
+            channels=self.channels,
+            text_sha256=text_digest(normalized_text),
+        )
+
+        result = VoiceSynthesisResult(
+            audio_path=str(audio_path),
+            metadata_path=str(metadata_sidecar_path(audio_path)),
+            metadata=metadata,
+        )
+        write_metadata_sidecar(result)
+        return validate_voice_result(result, fallback_enabled=self.fallback_enabled)
+
+    def generate_audio(self, text: str) -> tuple[str, float]:
+        """Backwards-compatible tuple return used by older call sites."""
+        result = self.synthesize(text)
+        return result.audio_path, result.metadata.duration_seconds
+
+    @staticmethod
+    def _estimate_duration_seconds(text: str) -> float:
         word_count = len(text.split())
-        # Estimate duration based on an average reading speed
-        duration = word_count * 0.4  # approx 150 words per minute
-        return duration
+        return max(0.2, word_count * 0.4)
 
+    @staticmethod
+    def _write_mock_audio(audio_path: Path) -> None:
+        audio_path.parent.mkdir(parents=True, exist_ok=True)
+        audio_path.write_bytes(b"MOCKAUDIO")
