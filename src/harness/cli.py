@@ -1,66 +1,59 @@
-# harness/cli.py
 import argparse
-import sys
 import json
+import os
+import sys
 from pathlib import Path
 
-from .session import PipelineTrainingSession
+from pydantic import ValidationError
+
 from .client import generate_plan, generate_scene, repair_scene
+from .exit_codes import HarnessExitCode
 from .parser import SemanticValidationError
+from .session import PipelineTrainingSession, SessionContractError
+from .contracts.scaffold import ScaffoldContractError, inject_scene_body_file
+from .contracts.state import load_state, save_state_atomic, update_state_key
+
+LEGACY_HARNESS_ENV_VARS = ("FH_HARNESS", "USE_HARNESS")
+
+
+def reject_legacy_fallback_toggles() -> None:
+    configured = {
+        name: os.getenv(name)
+        for name in LEGACY_HARNESS_ENV_VARS
+        if os.getenv(name, "").strip()
+    }
+    if configured:
+        pairs = ", ".join(f"{name}={value}" for name, value in configured.items())
+        raise PermissionError(f"legacy harness fallback toggles are disabled: {pairs}")
+
 
 def write_plan(plan, project_dir):
-    """Saves the generated plan to project_state.json"""
+    """Save plan into project_state.json using the canonical state contract."""
     project_dir = Path(project_dir)
     state_file = project_dir / "project_state.json"
-    
-    if state_file.exists():
-        with open(state_file, 'r') as f:
-            state = json.load(f)
-    else:
-        state = {}
-        
-    state['plan'] = plan.model_dump()
-    
-    with open(state_file, 'w') as f:
-        json.dump(state, f, indent=2)
+
+    if not state_file.exists():
+        raise FileNotFoundError(f"state file not found: {state_file}")
+
+    state = load_state(state_file)
+    updated_state = update_state_key(state, "plan", plan.model_dump(mode="json"))
+    save_state_atomic(state_file, updated_state)
     print(f"Plan written to {state_file}")
 
+
 def inject_scene_body(scene_body, scene_file):
-    """Injects the generated Python code into the scene file."""
-    scene_file = Path(scene_file)
-    if not scene_file.exists():
-        raise FileNotFoundError(f"Scene file not found: {scene_file}")
-
-    content = scene_file.read_text()
-    
-    # Replace the placeholder with the generated code
-    # Simple replacement for now, could be more robust
-    start_marker = "# SLOT_START:scene_body"
-    end_marker = "# SLOT_END:scene_body"
-    
-    start_index = content.find(start_marker)
-    end_index = content.find(end_marker)
-    
-    if start_index == -1 or end_index == -1:
-        raise ValueError("Scene file does not contain scene_body SLOT markers.")
-
-    new_content = (
-        content[:start_index + len(start_marker)] +
-        "\n" +
-        scene_body +
-        "\n    " +
-        content[end_index:]
-    )
-    
-    scene_file.write_text(new_content)
+    """Inject generated Python code into the scene file while preserving scaffold markers."""
+    inject_scene_body_file(scene_file, scene_body)
     print(f"Scene body injected into {scene_file}")
 
 
-def main():
+def main() -> int:
     parser = argparse.ArgumentParser(description="xAI Responses API harness")
-    parser.add_argument("--phase", required=True, choices=[
-        "plan", "narration", "build_scenes", "scene_qc", "scene_repair"
-    ])
+    parser.add_argument(
+        "--phase",
+        required=True,
+        choices=["plan", "narration", "build_scenes", "scene_qc", "scene_repair"],
+    )
     parser.add_argument("--project-dir", required=True)
     parser.add_argument("--topic", help="Topic for the video plan")
     parser.add_argument("--scene-file", help="For scene-specific phases")
@@ -70,29 +63,37 @@ def main():
 
     args = parser.parse_args()
 
-    # Load or create session
+    try:
+        reject_legacy_fallback_toggles()
+    except PermissionError as exc:
+        print(f"Policy Error: {exc}", file=sys.stderr)
+        return int(HarnessExitCode.POLICY_VIOLATION)
+
     try:
         session = PipelineTrainingSession.from_project(args.project_dir)
-    except FileNotFoundError as e:
-        print(f"Error: {e}", file=sys.stderr)
-        sys.exit(1)
+    except FileNotFoundError as exc:
+        print(f"Error: {exc}", file=sys.stderr)
+        return int(HarnessExitCode.INFRASTRUCTURE_ERROR)
+    except SessionContractError as exc:
+        print(f"Schema Error: {exc}", file=sys.stderr)
+        return int(HarnessExitCode.SCHEMA_VIOLATION)
 
     if args.dry_run:
         print("Dry run mode. No API calls will be made.")
-        sys.exit(0)
+        return int(HarnessExitCode.SUCCESS)
 
     try:
         if args.phase == "plan":
             if not args.topic:
                 print("Error: --topic is required for the 'plan' phase.", file=sys.stderr)
-                sys.exit(1)
+                return int(HarnessExitCode.POLICY_VIOLATION)
             result = generate_plan(session, args.topic, args.retry_context)
             write_plan(result, args.project_dir)
-        
+
         elif args.phase == "build_scenes":
             if not args.scene_spec or not args.scene_file:
                 print("Error: --scene-spec and --scene-file are required for 'build_scenes'.", file=sys.stderr)
-                sys.exit(1)
+                return int(HarnessExitCode.POLICY_VIOLATION)
             scene_spec = json.loads(args.scene_spec)
             result = generate_scene(session, scene_spec, args.retry_context)
             inject_scene_body(result.scene_body, args.scene_file)
@@ -100,23 +101,32 @@ def main():
         elif args.phase == "scene_repair":
             if not args.retry_context or not args.scene_file:
                 print("Error: --retry-context and --scene-file are required for 'scene_repair'.", file=sys.stderr)
-                sys.exit(1)
+                return int(HarnessExitCode.POLICY_VIOLATION)
             result = repair_scene(session, args.scene_file, args.retry_context)
             inject_scene_body(result.scene_body, args.scene_file)
-            
+
         else:
             print(f"Phase '{args.phase}' is not yet implemented.", file=sys.stderr)
-            sys.exit(1)
+            return int(HarnessExitCode.INFRASTRUCTURE_ERROR)
 
-        sys.exit(0)
+        return int(HarnessExitCode.SUCCESS)
 
-    except SemanticValidationError as e:
-        print(f"Validation Error: {e}", file=sys.stderr)
-        sys.exit(2)  # Exit code for retryable semantic error
-    
-    except Exception as e:
-        print(f"Harness Error: {e}", file=sys.stderr)
-        sys.exit(1)  # General error
+    except (SemanticValidationError, ScaffoldContractError) as exc:
+        print(f"Validation Error: {exc}", file=sys.stderr)
+        return int(HarnessExitCode.VALIDATION_ERROR)
+
+    except (ValidationError, json.JSONDecodeError) as exc:
+        print(f"Schema Error: {exc}", file=sys.stderr)
+        return int(HarnessExitCode.SCHEMA_VIOLATION)
+
+    except PermissionError as exc:
+        print(f"Policy Error: {exc}", file=sys.stderr)
+        return int(HarnessExitCode.POLICY_VIOLATION)
+
+    except Exception as exc:
+        print(f"Harness Error: {exc}", file=sys.stderr)
+        return int(HarnessExitCode.INFRASTRUCTURE_ERROR)
+
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

@@ -1,10 +1,10 @@
 # M0 Checklist - Contract Freeze Baseline
 
-Status: completed (Phase 4 deliverable)  
-Execution state: approved for Phase 5 execution  
+Status: complete (implemented in Phase 5)  
+Execution state: delivered and validated  
 Last updated: 2026-03-01
 
-Purpose: confirm M0 planning gates are complete and the contract-freeze execution scope is ready for Phase 5 implementation.
+Purpose: confirm M0 contract-freeze planning + implementation gates are complete and validated.
 
 ## Scope Confirmation
 
@@ -12,7 +12,7 @@ Purpose: confirm M0 planning gates are complete and the contract-freeze executio
 - [x] M0 scope maps to canonical game plan step 4 outputs and is ready for step 5 execution.
 - [x] No architecture pivots are introduced outside approved `docs/tech-spec/` direction.
 
-## Work Items (Planning Completion)
+## Work Items (Planning + Implementation Completion)
 
 - [x] v1 pipeline phase/state contract freeze documented in:
   - `docs/tech-spec/05-pipeline-state-machine/README.md`
@@ -28,6 +28,10 @@ Purpose: confirm M0 planning gates are complete and the contract-freeze executio
   - `docs/tech-spec/06-core-components/README.md`
   - `docs/tech-spec/09-validation-gates/README.md`
 - [x] Contract ambiguities were resolved into explicit decisions or bounded deferrals.
+- [x] State contract implementation added in `src/harness/contracts/state.py` and wired into `scripts/update_project_state.py`.
+- [x] Scaffold immutability contract implementation added in `src/harness/contracts/scaffold.py` and wired into `src/harness/cli.py`.
+- [x] Harness exit-code policy implementation added in `src/harness/exit_codes.py` and wired into `src/harness/cli.py`.
+- [x] Schema registry contract implementation added in `src/harness/schemas/__init__.py` and wired into `src/harness/client.py`.
 
 ## Acceptance Criteria
 
@@ -44,6 +48,13 @@ Purpose: confirm M0 planning gates are complete and the contract-freeze executio
   - Exit-code mapping tests,
   - State transition table tests.
 - [x] Evidence-capture requirements for commands/outcomes are documented in `docs/implementation-plan/phase4-completion-report.md`.
+
+## Execution Test Evidence
+
+- [x] `python3 -m pytest -q tests/contracts` -> `14 passed`.
+- [x] `python3 -m py_compile src/harness/cli.py src/harness/exit_codes.py src/harness/contracts/state.py src/harness/contracts/scaffold.py scripts/update_project_state.py` -> success.
+- [x] `python3 scripts/update_project_state.py set ... --key phase --value plan` (valid transition) -> success.
+- [x] `python3 scripts/update_project_state.py set ... --key phase --value build_scenes` from `plan` -> blocked with exit code `2` and transition error.
 
 ## Lessons Traceability
 

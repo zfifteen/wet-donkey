@@ -23,7 +23,7 @@ As of: 2026-03-01
 - Current blockers:
   - None for Phase 5 activation; implementation execution pending milestone-by-milestone delivery
 - Next concrete action:
-  - Start Phase 5 execution from M0 implementation tasks, using `docs/implementation-plan/README.md` and checklist artifacts as the approved baseline
+  - Execute Phase 5 M3 (Prompt/Schema/Parser Contract Lock): enforce prompt manifest validation and prompt-schema-parser alignment gates
 
 Rule: this snapshot is updated in place. Never append timeline entries here.
 
@@ -118,6 +118,7 @@ At session end:
 - Revised tech spec: `docs/tech-spec/`
 - Revised implementation plan: `docs/implementation-plan/README.md`
 - Legacy plan (non-canonical): `docs/legacy/WET_DONKEY_IMPLEMENTATION_PLAN.md`
+- Python runtime requirement: WD scripts/tests/tooling must run on `python3.13`; using `python3` or earlier runtimes is non-compliant.
 - IntelliJ MCP is the default execution surface when available.
   - Prefer IntelliJ-native operations for project analysis, code search, inspections, semantic symbol lookups, refactors, formatting, builds, and run configurations.
   - Prefer IntelliJ inspection/build outputs over ad-hoc manual reasoning whenever equivalent IDE functionality exists.

@@ -3,8 +3,15 @@ import argparse
 import os
 import json
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timezone
 from xai_sdk import Client
+
+SESSION_CONTRACT_VERSION = "1.0.0"
+
+
+def utc_timestamp() -> str:
+    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
 
 def extract_scene_id(scene_file_path: str) -> str:
     """Extracts 'scene_01' from '/path/to/scene_01_intro.py'"""
@@ -24,6 +31,10 @@ def upload_validated_scene(project_dir, scene_file, qc_report):
     with open(metadata_file) as f:
         metadata = json.load(f)
 
+    metadata.setdefault("contract_version", SESSION_CONTRACT_VERSION)
+    metadata.setdefault("documents", [])
+    metadata.setdefault("updated_at", utc_timestamp())
+
     project_collection_id = metadata["project_collection_id"]
     scene_id = extract_scene_id(scene_file)
 
@@ -37,8 +48,8 @@ def upload_validated_scene(project_dir, scene_file, qc_report):
             fields={
                 "scene_id": scene_id,
                 "status": "validated",
-                "timestamp": datetime.utcnow().isoformat()
-            }
+                "timestamp": utc_timestamp(),
+            },
         )
     print(f"Uploaded scene file with ID: {scene_doc.file_metadata.file_id}")
 
@@ -66,6 +77,7 @@ def upload_validated_scene(project_dir, scene_file, qc_report):
         metadata["documents"].append({"file_id": scene_doc.file_metadata.file_id, "name": scene_doc.name})
 
 
+    metadata["updated_at"] = utc_timestamp()
     with open(metadata_file, 'w') as f:
         json.dump(metadata, f, indent=2)
 

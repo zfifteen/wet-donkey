@@ -5,6 +5,7 @@ from .session import PipelineTrainingSession
 from .prompts import compose_prompts
 from .schemas.plan import Plan
 from .schemas.scene_build import SceneBuild
+from .schemas import get_schema_for_phase
 from .parser import SemanticValidationError, validate_timing_execution
 
 def generate_plan(session: PipelineTrainingSession, topic: str, retry_context: str = None):
@@ -14,7 +15,7 @@ def generate_plan(session: PipelineTrainingSession, topic: str, retry_context: s
     
     chat = session.create_chat(
         phase="plan",
-        response_format=Plan,  # Pydantic model for structured output
+        response_format=get_schema_for_phase("plan"),
     )
     
     chat.append(user(prompts["system"], prompts["user"]))
@@ -45,7 +46,7 @@ def generate_scene(session: PipelineTrainingSession, scene_spec: dict, retry_con
 
     chat = session.create_chat(
         phase="build_scenes",
-        response_format=SceneBuild
+        response_format=get_schema_for_phase("build_scenes"),
     )
     
     chat.append(user(prompts["system"], prompts["user"]))
@@ -70,7 +71,7 @@ def repair_scene(session: PipelineTrainingSession, scene_file: str, failure_reas
 
     chat = session.create_chat(
         phase="scene_repair",
-        response_format=SceneBuild
+        response_format=get_schema_for_phase("scene_repair"),
     )
 
     chat.append(user(prompts["system"], prompts["user"]))

@@ -3,7 +3,15 @@ import argparse
 import os
 import json
 from pathlib import Path
+from datetime import datetime, timezone
 from xai_sdk import Client
+
+SESSION_CONTRACT_VERSION = "1.0.0"
+
+
+def utc_timestamp() -> str:
+    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
 
 def initialize_training_corpus(project_dir: str, project_name: str, template_collection_id: str = None):
     """Create Collections for template library and scene examples"""
@@ -45,9 +53,11 @@ def initialize_training_corpus(project_dir: str, project_name: str, template_col
 
     # 3. Save metadata
     metadata = {
+        "contract_version": SESSION_CONTRACT_VERSION,
         "template_collection_id": template_collection_id,
         "project_collection_id": project_collection_id,
-        "documents": []
+        "documents": [],
+        "updated_at": utc_timestamp(),
     }
     metadata_file = project_dir / ".collections_metadata.json"
     with open(metadata_file, 'w') as f:

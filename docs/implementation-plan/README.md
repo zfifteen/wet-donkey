@@ -282,12 +282,14 @@ For each milestone, produce:
 
 - Created: `docs/implementation-plan/README.md`.
 - Phase state: Phase 4 complete; plan approved as the active execution baseline for Phase 5.
-- Next action: execute Phase 5 milestones starting with M0 implementation tasks and required test gates.
+- Next action: execute Phase 5 M3 (Prompt/Schema/Parser Contract Lock) and collect acceptance-test evidence.
 
 ## 11) Phase 4 Completion Record
 
 - Completion report: `docs/implementation-plan/phase4-completion-report.md`
 - M0 checklist: `docs/implementation-plan/M0-checklist.md`
+- M1 evidence: `docs/implementation-plan/M1-evidence.md`
+- M2 evidence: `docs/implementation-plan/M2-evidence.md`
 - M1-M7 checklists: `docs/implementation-plan/milestone-checklists.md`
 - Phase 5 kickoff checklist: `docs/implementation-plan/phase5-kickoff-checklist.md`
 - Readiness decision: Phase 5 kickoff approved on 2026-03-01.

@@ -27,13 +27,16 @@ echo "Project directory created at '${PROJECT_DIR}'"
 # Initial project state
 cat > "${PROJECT_DIR}/project_state.json" << EOL
 {
+  "contract_version": "1.0.0",
   "project_name": "${PROJECT_NAME}",
   "topic": "${TOPIC}",
   "phase": "init",
+  "phase_status": "active",
   "history": [
     {
       "phase": "init",
-      "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+      "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+      "actor": "orchestrator"
     }
   ]
 }
