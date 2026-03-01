@@ -1,0 +1,26 @@
+{
+  "contract_version": "1.0.0",
+  "prompt_id": "05_scene_qc_v1",
+  "phase": "scene_qc",
+  "schema_name": "SceneQC",
+  "required_variables": [
+    "scene_code"
+  ],
+  "optional_variables": [],
+  "required_tools": [],
+  "allowed_tools": [
+    "collections_search",
+    "code_execution"
+  ],
+  "required_annotations": [],
+  "output_restrictions": [
+    "json_only",
+    "no_code_fences"
+  ],
+  "output_fields": [
+    "scene_title",
+    "passed",
+    "score",
+    "issues"
+  ]
+}

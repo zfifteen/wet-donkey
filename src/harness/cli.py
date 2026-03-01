@@ -7,8 +7,9 @@ from pathlib import Path
 from pydantic import ValidationError
 
 from .client import generate_plan, generate_scene, repair_scene
+from .contracts.prompt_manifest import PromptContractError
 from .exit_codes import HarnessExitCode
-from .parser import SemanticValidationError
+from .parser import SchemaContractError, SemanticValidationError
 from .session import PipelineTrainingSession, SessionContractError
 from .contracts.scaffold import ScaffoldContractError, inject_scene_body_file
 from .contracts.state import load_state, save_state_atomic, update_state_key
@@ -115,7 +116,7 @@ def main() -> int:
         print(f"Validation Error: {exc}", file=sys.stderr)
         return int(HarnessExitCode.VALIDATION_ERROR)
 
-    except (ValidationError, json.JSONDecodeError) as exc:
+    except (ValidationError, json.JSONDecodeError, SessionContractError, SchemaContractError, PromptContractError) as exc:
         print(f"Schema Error: {exc}", file=sys.stderr)
         return int(HarnessExitCode.SCHEMA_VIOLATION)
 

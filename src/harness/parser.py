@@ -1,4 +1,13 @@
-# harness/parser.py
+from __future__ import annotations
+
+from typing import Any
+
+from pydantic import ValidationError
+
+from .schemas import SCHEMA_REGISTRY_CONTRACT_VERSION, get_schema_for_phase
+
+PARSER_SCHEMA_CONTRACT_VERSION = "1.0.0"
+
 
 class SemanticValidationError(Exception):
     """
@@ -6,6 +15,31 @@ class SemanticValidationError(Exception):
     business logic or semantic checks.
     """
     pass
+
+
+class SchemaContractError(ValueError):
+    """Raised when parser schema contract metadata drifts from the registry."""
+
+
+def validate_parser_schema_alignment() -> None:
+    if PARSER_SCHEMA_CONTRACT_VERSION != SCHEMA_REGISTRY_CONTRACT_VERSION:
+        raise SchemaContractError(
+            "parser/schema contract version mismatch: "
+            f"parser={PARSER_SCHEMA_CONTRACT_VERSION}, "
+            f"registry={SCHEMA_REGISTRY_CONTRACT_VERSION}"
+        )
+
+
+def validate_phase_payload(phase: str, payload: Any):
+    """
+    Validate payload against the canonical schema for a phase.
+    """
+    validate_parser_schema_alignment()
+    schema = get_schema_for_phase(phase)
+    try:
+        return schema.model_validate(payload)
+    except ValidationError:
+        raise
 
 # The xAI SDK's `response_format` feature with Pydantic models handles
 # the primary JSON parsing and type validation. This file can be

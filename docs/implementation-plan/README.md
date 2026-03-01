@@ -251,7 +251,7 @@ For each milestone, produce:
 |---|---|---|---|---|---|
 | R-001 | Contract freeze unresolved before implementation expansion | High regression/churn risk | Phase 3 approved; M0 contract freeze planning deliverables completed; execute M0 implementation gates first in Phase 5 | WD Team | mitigated |
 | R-002 | Retry budgets undefined by phase | Loop and blocked-state inconsistency | Defaults locked in tech spec; codify and test in M1/M4 | WD Team | mitigating |
-| R-003 | Prompt/schema/parser alignment automation unresolved | High parse/contract failure recurrence | Deliver M3 CI alignment gates before broad generator changes | WD Team | open |
+| R-003 | Prompt/schema/parser alignment automation unresolved | High parse/contract failure recurrence | Deliver M3 CI alignment gates before broad generator changes | WD Team | mitigating |
 | R-004 | Voice fallback policy ambiguity | Runtime nondeterminism in narration stages | Policy locked in tech spec; enforce in M5 implementation and tests | WD Team | mitigating |
 | R-005 | Docs/code drift under execution pressure | Architectural divergence | Enforce docs-as-gate in M6 CI policy | WD Team | open |
 
@@ -282,7 +282,7 @@ For each milestone, produce:
 
 - Created: `docs/implementation-plan/README.md`.
 - Phase state: Phase 4 complete; plan approved as the active execution baseline for Phase 5.
-- Next action: execute Phase 5 M3 (Prompt/Schema/Parser Contract Lock) and collect acceptance-test evidence.
+- Next action: execute Phase 5 M4 (Validation Hierarchy and Retry Control) and collect acceptance-test evidence.
 
 ## 11) Phase 4 Completion Record
 
@@ -290,6 +290,7 @@ For each milestone, produce:
 - M0 checklist: `docs/implementation-plan/M0-checklist.md`
 - M1 evidence: `docs/implementation-plan/M1-evidence.md`
 - M2 evidence: `docs/implementation-plan/M2-evidence.md`
+- M3 evidence: `docs/implementation-plan/M3-evidence.md`
 - M1-M7 checklists: `docs/implementation-plan/milestone-checklists.md`
 - Phase 5 kickoff checklist: `docs/implementation-plan/phase5-kickoff-checklist.md`
 - Readiness decision: Phase 5 kickoff approved on 2026-03-01.

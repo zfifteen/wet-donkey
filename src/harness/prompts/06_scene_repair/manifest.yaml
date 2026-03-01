@@ -1,0 +1,29 @@
+{
+  "contract_version": "1.0.0",
+  "prompt_id": "06_scene_repair_v1",
+  "phase": "scene_repair",
+  "schema_name": "SceneBuild",
+  "required_variables": [
+    "scene_file_content",
+    "failure_reason"
+  ],
+  "optional_variables": [],
+  "required_tools": [
+    "collections_search",
+    "code_execution"
+  ],
+  "allowed_tools": [
+    "collections_search",
+    "code_execution"
+  ],
+  "required_annotations": [],
+  "output_restrictions": [
+    "json_only",
+    "no_code_fences",
+    "scene_body_only"
+  ],
+  "output_fields": [
+    "scene_body",
+    "reasoning"
+  ]
+}

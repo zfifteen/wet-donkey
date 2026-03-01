@@ -1,0 +1,31 @@
+{
+  "contract_version": "1.0.0",
+  "prompt_id": "00_plan_v1",
+  "phase": "plan",
+  "schema_name": "Plan",
+  "required_variables": [
+    "topic"
+  ],
+  "optional_variables": [
+    "retry_context"
+  ],
+  "required_tools": [
+    "web_search"
+  ],
+  "allowed_tools": [
+    "collections_search",
+    "code_execution",
+    "web_search"
+  ],
+  "required_annotations": [],
+  "output_restrictions": [
+    "json_only",
+    "no_code_fences"
+  ],
+  "output_fields": [
+    "title",
+    "description",
+    "target_duration_seconds",
+    "scenes"
+  ]
+}

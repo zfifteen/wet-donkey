@@ -1,0 +1,24 @@
+{
+  "contract_version": "1.0.0",
+  "prompt_id": "02_narration_v1",
+  "phase": "narration",
+  "schema_name": "Narration",
+  "required_variables": [
+    "plan"
+  ],
+  "optional_variables": [],
+  "required_tools": [],
+  "allowed_tools": [
+    "collections_search",
+    "code_execution",
+    "web_search"
+  ],
+  "required_annotations": [],
+  "output_restrictions": [
+    "json_only",
+    "no_code_fences"
+  ],
+  "output_fields": [
+    "scenes"
+  ]
+}

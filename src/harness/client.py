@@ -1,12 +1,16 @@
 # harness/client.py
 from pathlib import Path
+
 from xai_sdk.chat import user
+
 from .session import PipelineTrainingSession
 from .prompts import compose_prompts
 from .schemas.plan import Plan
-from .schemas.scene_build import SceneBuild
 from .schemas import get_schema_for_phase
-from .parser import SemanticValidationError, validate_timing_execution
+from .parser import (
+    validate_phase_payload,
+    validate_timing_execution,
+)
 
 def generate_plan(session: PipelineTrainingSession, topic: str, retry_context: str = None):
     """Generate structured plan with API-enforced schema"""
@@ -21,9 +25,7 @@ def generate_plan(session: PipelineTrainingSession, topic: str, retry_context: s
     chat.append(user(prompts["system"], prompts["user"]))
     response = chat.sample()
     
-    # The SDK handles the validation against the Pydantic model.
-    # We can directly access the parsed object.
-    plan = response.content
+    plan = validate_phase_payload("plan", response.content)
     
     session.update_response_id(response.id)
     
@@ -55,7 +57,7 @@ def generate_scene(session: PipelineTrainingSession, scene_spec: dict, retry_con
     # Validate that the model actually used the code execution tool for timing
     validate_timing_execution(response)
 
-    scene_build = response.content
+    scene_build = validate_phase_payload("build_scenes", response.content)
     session.update_response_id(response.id)
 
     return scene_build
@@ -77,7 +79,7 @@ def repair_scene(session: PipelineTrainingSession, scene_file: str, failure_reas
     chat.append(user(prompts["system"], prompts["user"]))
     response = chat.sample()
 
-    scene_repair = response.content
+    scene_repair = validate_phase_payload("scene_repair", response.content)
     session.update_response_id(response.id)
 
     return scene_repair

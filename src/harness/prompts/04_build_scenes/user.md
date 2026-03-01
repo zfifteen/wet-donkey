@@ -6,6 +6,13 @@ Generate the Manim scene body for:
 -   **Narration duration**: {{ narration_duration }}s
 -   **Visual ideas**: {{ visual_ideas }}
 
+{% if retry_context %}
+## Retry Context
+
+The previous attempt failed with the following error context:
+{{ retry_context }}
+{% endif %}
+
 ## Available Tools
 
 1.  **Search template library**: Find proven patterns.

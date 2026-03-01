@@ -1,0 +1,33 @@
+{
+  "contract_version": "1.0.0",
+  "prompt_id": "04_build_scenes_v1",
+  "phase": "build_scenes",
+  "schema_name": "SceneBuild",
+  "required_variables": [
+    "scene_title",
+    "scene_description",
+    "narration_duration",
+    "visual_ideas"
+  ],
+  "optional_variables": [
+    "retry_context"
+  ],
+  "required_tools": [
+    "collections_search",
+    "code_execution"
+  ],
+  "allowed_tools": [
+    "collections_search",
+    "code_execution"
+  ],
+  "required_annotations": [],
+  "output_restrictions": [
+    "json_only",
+    "no_code_fences",
+    "scene_body_only"
+  ],
+  "output_fields": [
+    "scene_body",
+    "reasoning"
+  ]
+}
