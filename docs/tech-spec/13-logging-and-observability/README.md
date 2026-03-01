@@ -1,6 +1,6 @@
 # 13 Logging and Observability
 
-Status: draft
+Status: approved
 
 ## Purpose
 
@@ -78,12 +78,13 @@ For failures, include:
 
 ## Open Questions
 
-- What log retention windows should apply for local vs CI vs production runs?
-- Should trace exports be generated automatically for blocked runs?
-- Which observability checks should be required in CI gates?
+- None for WD v1. Previously listed questions were resolved on 2026-03-01 and codified in `Decisions`.
 
 ## Decisions
 
 - WD uses structured logging with mandatory correlation IDs.
 - Failure diagnostics must support loop detection and owner-targeted remediation.
 - Logging behavior is contract-bound and versioned with the spec.
+- Retention defaults are: local runs `14 days`, CI artifacts `30 days`, and persistent production-like runs `90 days` (or stricter organizational policy, whichever is greater).
+- Blocked runs must automatically emit a deterministic trace export bundle (state snapshot, gate failures, artifact pointers, retry history summary).
+- CI observability gates require: valid JSONL schema, presence of `run_id`/`phase_attempt_id`, and complete blocked-run diagnostic payloads.

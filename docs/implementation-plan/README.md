@@ -1,25 +1,25 @@
 # Wet Donkey Revised Implementation Plan
 
-Status: draft (prepared; not active)  
-Last updated: 2026-02-26  
-Current canonical phase: Phase 3 (revised tech spec finalization)  
+Status: complete (Phase 4 delivered; Phase 5 execution baseline)  
+Last updated: 2026-03-01  
+Current canonical phase: Phase 5 (implementation execution against approved plan)  
 Plan source of truth: `docs/tech-spec/` + `docs/lessons-learned/flaming-horse-lessons.md`
 
 ## 1) Session Start Alignment (Anti-Drift)
 
 - Mission restatement: WD remains a clean re-implementation of FH, with deterministic contracts and no dual-harness regression.
-- Current phase restatement: Phase 3 is active until tech spec finalization/approval is granted; this Phase 4 plan is prepared but gated.
+- Current phase restatement: Phase 4 deliverables are complete; this document is now the approved baseline for active Phase 5 execution.
 - Canonical game-plan alignment: this document executes step 4 without reordering steps 1-3.
-- Drift snapshot (as of 2026-02-26):
-  - `docs/implementation-plan/README.md` did not exist; created in this session.
-  - Tech spec and lessons exist and are populated; implementation plan is drafted and pending Phase 3 approval to become active.
+- Drift snapshot (as of 2026-03-01):
+  - Tech spec sections are approved and Phase 3 is explicitly approved in canonical control docs.
+  - Implementation plan is approved and synchronized to finalized Phase 3 defaults.
 
 ## 1.1) Phase Gate
 
-Phase 4 activation condition:
+Phase 5 activation condition:
 
-- This plan remains `prepared` until Phase 3 is explicitly marked approved.
-- Do not begin Phase 5 implementation work while any Phase 3 section remains draft-unapproved.
+- [x] Phase 4 milestones and acceptance criteria are completed and evidence-backed.
+- [x] Phase 5 kickoff checklist is explicitly approved in canonical control docs.
 
 ## 2) Planning Principles
 
@@ -34,7 +34,7 @@ Phase 4 activation condition:
 
 ### In Scope (Phase 4 to execution handoff)
 
-- Freeze implementable WD v1 contracts from current tech spec draft.
+- Freeze implementable WD v1 contracts from current approved tech-spec baseline.
 - Sequence WD implementation into testable milestones with acceptance criteria.
 - Define CI/test gates per milestone.
 - Track open risks/unknowns explicitly.
@@ -249,19 +249,19 @@ For each milestone, produce:
 
 | Risk ID | Risk | Impact | Mitigation | Owner | Status |
 |---|---|---|---|---|---|
-| R-001 | Contract freeze unresolved before implementation expansion | High regression/churn risk | Finish M0 before opening broader feature work | WD Team | open |
-| R-002 | Retry budgets undefined by phase | Loop and blocked-state inconsistency | Define phase budgets in M1/M4 and codify tests | WD Team | open |
+| R-001 | Contract freeze unresolved before implementation expansion | High regression/churn risk | Phase 3 approved; M0 contract freeze planning deliverables completed; execute M0 implementation gates first in Phase 5 | WD Team | mitigated |
+| R-002 | Retry budgets undefined by phase | Loop and blocked-state inconsistency | Defaults locked in tech spec; codify and test in M1/M4 | WD Team | mitigating |
 | R-003 | Prompt/schema/parser alignment automation unresolved | High parse/contract failure recurrence | Deliver M3 CI alignment gates before broad generator changes | WD Team | open |
-| R-004 | Voice fallback policy ambiguity | Runtime nondeterminism in narration stages | Lock explicit fallback policy during M5 | WD Team | open |
+| R-004 | Voice fallback policy ambiguity | Runtime nondeterminism in narration stages | Policy locked in tech spec; enforce in M5 implementation and tests | WD Team | mitigating |
 | R-005 | Docs/code drift under execution pressure | Architectural divergence | Enforce docs-as-gate in M6 CI policy | WD Team | open |
 
-## 8) Open Decisions to Resolve During Execution
+## 8) Locked Decisions from Phase 3 Finalization
 
-- Exact per-phase `max_attempts` defaults (`plan`, `build_scenes`, `scene_qc`, `final_render`).
-- Whether `blocked` is represented as phase vs phase-status flag.
-- Prompt manifest format choice (machine-readable recommended).
-- Voice fallback policy for v1 (disabled by default recommended).
-- Duration tolerance threshold for final output validation.
+- Per-phase retry defaults are fixed (`plan=2`, `build_scenes=4`, `scene_qc=3`, `final_render=2`, others bounded <= 2 where applicable).
+- `blocked` is represented as `phase_status` on the active phase, not a standalone phase.
+- Prompt manifests are machine-readable YAML with strict undeclared-variable rejection.
+- Voice fallback is disabled by default in v1 and allowed only via explicit non-release configuration.
+- Final output duration tolerance is `max(0.5s, 2% of expected duration)`.
 
 ## 9) Traceability Matrix (Lessons -> Spec -> Milestones)
 
@@ -281,5 +281,13 @@ For each milestone, produce:
 ## 10) Session State Snapshot (Anti-Drift)
 
 - Created: `docs/implementation-plan/README.md`.
-- Phase state: Phase 4 plan is drafted and aligned to current spec + lessons, but remains gated.
-- Next action: finalize and approve Phase 3 tech spec, then activate this Phase 4 plan.
+- Phase state: Phase 4 complete; plan approved as the active execution baseline for Phase 5.
+- Next action: execute Phase 5 milestones starting with M0 implementation tasks and required test gates.
+
+## 11) Phase 4 Completion Record
+
+- Completion report: `docs/implementation-plan/phase4-completion-report.md`
+- M0 checklist: `docs/implementation-plan/M0-checklist.md`
+- M1-M7 checklists: `docs/implementation-plan/milestone-checklists.md`
+- Phase 5 kickoff checklist: `docs/implementation-plan/phase5-kickoff-checklist.md`
+- Readiness decision: Phase 5 kickoff approved on 2026-03-01.

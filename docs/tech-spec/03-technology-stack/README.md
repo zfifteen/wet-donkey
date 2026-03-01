@@ -1,6 +1,6 @@
 # 03 Technology Stack
 
-Status: draft
+Status: approved
 
 ## Purpose
 
@@ -48,12 +48,13 @@ Define WD’s approved technology stack and boundary rationale to reduce archite
 
 ## Open Questions
 
-- Which versions should be hard-pinned in v1 baseline?
-- Which stack components can be optional for local development?
-- What formal deprecation window should WD require for stack changes?
+- None for WD v1. Previously listed questions were resolved on 2026-03-01 and codified in `Decisions`.
 
 ## Decisions
 
 - WD adopts a single, documented stack per subsystem for v1.
 - Stack changes require spec update, migration notes, and tests.
 - Runtime-critical dependency behavior must be deterministic and observable.
+- WD v1 baseline versions are pinned to: Python `3.12.x`, Pydantic `2.x`, pytest `8.x`, Manim CE `0.19.x`, and ffmpeg major `7` (or approved compatibility equivalent in CI images).
+- Optional local-development components are limited to retrieval/training integrations and live API smoke tests; contract/validation/test gates remain mandatory regardless of optional components.
+- Dependency deprecation policy is a minimum of two implementation milestones (or 30 days, whichever is longer) with compatibility notes and removal criteria tracked in spec + plan.

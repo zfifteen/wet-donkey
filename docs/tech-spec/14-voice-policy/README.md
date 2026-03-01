@@ -1,6 +1,6 @@
 # 14 Voice Policy
 
-Status: draft
+Status: approved
 
 ## Purpose
 
@@ -49,12 +49,13 @@ Define a stable voice synthesis policy that guarantees deterministic behavior an
 
 ## Open Questions
 
-- Is fallback ever allowed in v1, or strictly prohibited?
-- What cache invalidation policy applies when voice config changes?
-- Which minimum audio quality checks are mandatory before assembly?
+- None for WD v1. Previously listed questions were resolved on 2026-03-01 and codified in `Decisions`.
 
 ## Decisions
 
 - WD voice behavior is governed by a strict adapter contract and explicit policy flags.
 - Cache and fallback behavior must be deterministic and observable.
 - Voice generation failures cannot be silently bypassed.
+- v1 fallback policy is disabled by default; fallback may only be enabled for non-release runs through explicit configuration and must be labeled in output metadata.
+- Cache invalidation is deterministic through a cache key composed of normalized narration text + voice profile + synthesis settings hash; changed voice configuration always produces a new key.
+- Minimum audio acceptance checks in v1 are: file exists, decodable format, non-zero duration, duration metadata present, and sample-rate/channel metadata captured for downstream timing validation.

@@ -1,6 +1,6 @@
 # Appendix A: Migration from Legacy Harness
 
-Status: draft
+Status: approved
 
 ## Purpose
 

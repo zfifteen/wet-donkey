@@ -1,6 +1,6 @@
 # 04 Directory Structure
 
-Status: draft
+Status: approved
 
 ## Purpose
 
@@ -43,12 +43,13 @@ Define a repository layout that separates source of truth, generated artifacts, 
 
 ## Open Questions
 
-- Should fixtures live under `tests/fixtures/` or phase-specific subtrees?
-- Which generated artifacts, if any, are intentionally versioned?
-- Do we need dedicated `ops/` or `tools/` directories in v1?
+- None for WD v1. Previously listed questions were resolved on 2026-03-01 and codified in `Decisions`.
 
 ## Decisions
 
 - WD repository layout separates core source, docs, and runtime artifacts by default.
 - Core code review should not be polluted by generated operational outputs.
 - Spec and lessons directories are permanent top-level architecture assets.
+- Test fixtures live under `tests/fixtures/` with phase-scoped subtrees (for example `tests/fixtures/build_scenes/`).
+- Only deterministic golden fixtures and regression assets may be versioned; runtime outputs under `projects/` remain non-canonical and excluded from core implementation review.
+- WD v1 will not introduce top-level `ops/` or `tools/`; operational scripts remain under `scripts/` until a dedicated split is justified by milestone scope.

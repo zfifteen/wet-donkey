@@ -1,6 +1,6 @@
 # 08 Data Contracts
 
-Status: draft
+Status: approved
 
 ## Purpose
 
@@ -36,12 +36,12 @@ Define canonical data contracts across pipeline state, phase payloads, and gener
 - Prompts must target schema fields exactly (no parallel informal fields).
 - Schema changes require coordinated updates to prompt templates, parser logic, and tests.
 
-2.1 Plan Schema Constraints (Draft)
+2.1 Plan Schema Constraints
 - `visual_ideas` must be intent-level natural language or constrained tags, not executable Manim API calls.
 - Any structured tags or tokens must come from a versioned allowlist (for example `intent:highlight`, `intent:transform`).
 - If raw Manim API tokens appear, the plan is rejected before build.
 
-2.1 Prompt Capability Manifest (Draft)
+2.2 Prompt Capability Manifest
 - Each prompt template includes a machine-readable capability manifest:
   - `required_tools` (array)
   - `allowed_tools` (array)
@@ -50,7 +50,7 @@ Define canonical data contracts across pipeline state, phase payloads, and gener
 - Orchestrator must validate that required tools and annotations are compatible with phase tool policy and output schema.
 - If incompatible, phase fails closed before any model call.
 
-Example (Draft):
+Example:
 ```
 {
   "prompt_id": "build_scenes_v1",
@@ -70,9 +70,7 @@ Example (Draft):
 - `.xai_session.json` and collection metadata must be versioned and backward-compatible within major WD spec version.
 - Missing required metadata is a hard failure, not silently repaired.
 
-5. Context Manager Contract (Draft)
-
-Status: draft (subject to refinement during tech spec iteration)
+5. Context Manager Contract
 
 Purpose: define the deterministic interface between orchestrator/harness and the Context Manager for payload assembly and context continuity enforcement.
 Logging: see `docs/tech-spec/13-logging-and-observability/README.md` for required Context Manager log fields.
@@ -107,7 +105,7 @@ Optional fields:
 - `full_payload_pointer` (string) — deterministic pointer to full artifacts/logs
 - `compaction_reason` (string)
 
-Example (Draft)
+Example
 
 Input:
 ```
@@ -153,7 +151,7 @@ Output:
 }
 ```
 
-Validation Checklist (Draft)
+Validation Checklist
 - `model_id` is recognized and maps to a known context limit.
 - `context_budget_tokens` equals the derived budget for the model.
 - `payload_tokens_est` does not exceed `context_budget_tokens`.
@@ -182,9 +180,7 @@ Validation Checklist (Draft)
 
 ## Open Questions
 
-- Which contract fields are mandatory in v1 vs deferred?
-- How strict should backward compatibility be for session metadata in pre-release WD milestones?
-- Should schema registries be centralized under one module or kept per phase package?
+- None for WD v1. Previously listed questions were resolved on 2026-03-01 and codified in `Decisions`.
 
 ## Decisions
 
@@ -192,3 +188,6 @@ Validation Checklist (Draft)
 - Prompt, schema, parser, and orchestrator contracts must remain synchronized or CI fails.
 - Scaffold mutation outside slot boundaries is a hard contract violation.
 - LLM-generated payloads are untrusted until they pass deterministic contract and validation gates.
+- v1-mandatory contract fields are all `project_state.json` required fields, all phase-schema required fields, scaffold slot markers, and Context Manager required input/output fields defined in this section.
+- Backward compatibility policy for pre-release WD is strict within a minor spec version; breaking changes require major contract bump plus migration notes and fixture/test updates.
+- Schema registries are centralized under `src/harness/schemas/` with phase-local modules as implementation detail only.

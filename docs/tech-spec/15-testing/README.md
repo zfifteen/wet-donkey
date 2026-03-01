@@ -1,6 +1,6 @@
 # 15 Testing
 
-Status: draft
+Status: approved
 
 ## Purpose
 
@@ -81,12 +81,13 @@ Define a test strategy that validates WD contracts early, prevents regressions d
 
 ## Open Questions
 
-- What minimum coverage threshold is acceptable for WD v1 milestones?
-- Which end-to-end tests must run by default vs nightly-only?
-- How should live API tests be isolated from deterministic CI baselines?
+- None for WD v1. Previously listed questions were resolved on 2026-03-01 and codified in `Decisions`.
 
 ## Decisions
 
 - WD will prioritize contract and integration tests before expanding e2e scope.
 - Lessons-derived failure classes are tracked with explicit regression tests.
 - CI merge policy requires passing contract-critical suites.
+- Minimum v1 coverage targets are `>=85%` for contract-critical modules and explicit scenario coverage for each phase transition and retry/escalation branch.
+- Default CI executes deterministic contract/unit/integration suites plus one fixture-based e2e smoke path; full multi-topic e2e and live API suites run nightly.
+- Live API tests are isolated behind explicit markers and secrets gating, and they cannot silently replace deterministic CI baselines for merge decisions.

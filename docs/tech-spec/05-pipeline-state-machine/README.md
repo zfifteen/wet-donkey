@@ -1,6 +1,6 @@
 # 05 Pipeline State Machine
 
-Status: draft
+Status: approved
 
 ## Purpose
 
@@ -55,12 +55,13 @@ Specify deterministic pipeline phase flow, transition rules, and failure handlin
 
 ## Open Questions
 
-- Should `blocked` be a distinct phase or a flag on current phase?
-- What are phase-specific retry budgets (for example `plan` vs `build_scenes`)?
-- Which manual gates besides `review` are mandatory in v1?
+- None for WD v1. Previously listed questions were resolved on 2026-03-01 and codified in `Decisions`.
 
 ## Decisions
 
 - Orchestrator is the sole authority for phase advancement.
 - Transition behavior must be acceptance-tested phase by phase.
 - Retry behavior is explicitly bounded and cannot serve as normal execution flow.
+- `blocked` is represented as a `phase_status` flag on the active phase (not a separate phase name) to preserve deterministic phase identity.
+- WD v1 default `max_attempts` by phase: `init=1`, `plan=2`, `review=1` (manual gate), `narration=2`, `build_scenes=4`, `scene_qc=3`, `precache_voiceovers=2`, `final_render=2`, `assemble=2`.
+- Mandatory manual gates in v1 are `review` approval and blocked-state resume approval; no other manual gates may be introduced without a spec update.

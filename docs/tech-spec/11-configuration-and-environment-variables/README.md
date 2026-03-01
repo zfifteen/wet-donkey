@@ -1,6 +1,6 @@
 # 11 Configuration and Environment Variables
 
-Status: draft
+Status: approved
 
 ## Purpose
 
@@ -56,12 +56,13 @@ Define deterministic runtime configuration rules so WD behavior is explicit, rep
 
 ## Open Questions
 
-- Should WD use a single `.env` profile or layered environments (`.env.local`, `.env.ci`)?
-- Which feature flags are temporary vs permanent configuration surface?
-- Should startup validation emit machine-readable diagnostics for CI gates?
+- None for WD v1. Previously listed questions were resolved on 2026-03-01 and codified in `Decisions`.
 
 ## Decisions
 
 - WD uses strict startup preflight validation for configuration.
 - Required vs optional variables are explicitly documented and tested.
 - Runtime defaults are centralized; hidden implicit fallbacks are disallowed.
+- WD uses layered environment files with precedence: `.env` < `.env.local` < `.env.ci`; missing files are allowed but required keys must still validate.
+- Temporary feature flags must include an expiry milestone and removal owner; permanent flags require explicit stability rationale in spec.
+- Startup validation emits both human-readable output and machine-readable JSON diagnostics for CI consumption.

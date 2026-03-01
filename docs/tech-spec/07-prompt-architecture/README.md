@@ -1,6 +1,6 @@
 # 07 Prompt Architecture
 
-Status: draft
+Status: approved
 
 ## Purpose
 
@@ -63,12 +63,13 @@ Define a prompt system that is schema-aligned, phase-specific, and resistant to 
 
 ## Open Questions
 
-- Should prompt manifests be markdown tables or machine-readable YAML/JSON?
-- How strict should undeclared-variable rejection be in early WD milestones?
-- Should prompt assets support per-model variants or one canonical form?
+- None for WD v1. Previously listed questions were resolved on 2026-03-01 and codified in `Decisions`.
 
 ## Decisions
 
 - WD prompt architecture is phase-scoped and contract-driven.
 - Prompt templates must remain synchronized with schema and parser contracts.
 - Retry/repair prompting always uses structured failure context from validation gates.
+- Prompt manifests are machine-readable YAML files co-located with templates; markdown tables are optional documentation views only.
+- Undeclared-variable rejection runs in strict mode for all v1 phases from first implementation milestone.
+- WD maintains one canonical prompt set per phase; per-model variants are permitted only as bounded override files that cannot change schema/output contracts.

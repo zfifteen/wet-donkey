@@ -1,6 +1,6 @@
 # 10 Self-Healing and Retry Logic
 
-Status: draft
+Status: approved
 
 ## Purpose
 
@@ -94,12 +94,13 @@ Context truncation that removes required diagnostics is a retry-ineligible failu
 
 ## Open Questions
 
-- What default `max_attempts` values should WD use per phase in v1?
-- What exact criteria define a “meaningful delta” between attempts?
-- Should blocked-state recovery require explicit human annotation before resume?
+- None for WD v1. Previously listed questions were resolved on 2026-03-01 and codified in `Decisions`.
 
 ## Decisions
 
 - WD will enforce bounded retries with per-phase budgets and loop detection.
 - Retries without new evidence/context are disallowed.
 - Repeated identical failures escalate to blocked state instead of continued repair cycling.
+- v1 default retry budgets align with section 05 phase defaults (`plan=2`, `build_scenes=4`, `scene_qc=3`, `final_render=2`, all other executable phases `<=2`).
+- A "meaningful delta" requires at least one of: changed failing artifact lines, changed contract-constrained field values, changed failure-class remediation directives, or new retrieval evidence pointers.
+- Resume from `blocked` requires an explicit human annotation with selected action (`retry_with_override`, `accept_partial`, or `abort`) and is recorded in state history.

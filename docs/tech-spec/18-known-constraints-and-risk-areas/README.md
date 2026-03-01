@@ -1,6 +1,6 @@
 # 18 Known Constraints and Risk Areas
 
-Status: draft
+Status: approved
 
 ## Purpose
 
@@ -70,12 +70,13 @@ Track known WD constraints and risk areas explicitly so design and implementatio
 
 ## Open Questions
 
-- Which risks are acceptable for WD v1 launch versus deferred mitigation?
-- What quantitative risk thresholds should trigger design review?
-- How should risk status be reported per milestone?
+- None for WD v1. Previously listed questions were resolved on 2026-03-01 and codified in `Decisions`.
 
 ## Decisions
 
 - WD will maintain explicit risk tracking as part of core technical governance.
 - Risk controls are implemented as enforceable process + technical gates.
 - Lessons-derived risks are prioritized in planning and test strategy.
+- WD v1 launch criterion requires zero unresolved high-severity contract or state-control risks; medium risks may ship only with named owner, mitigation, and milestone target.
+- Quantitative design-review trigger defaults are: three repeated failures of same signature in one week, any blocked-state recurrence after manual resume, or contract-gate false-positive rate above `5%`.
+- Milestone risk reporting is required in implementation-plan updates with per-risk status (`open`, `mitigating`, `mitigated`, `accepted`) and evidence links.

@@ -1,6 +1,6 @@
 # Appendices
 
-Status: stub
+Status: approved
 
 ## Index
 

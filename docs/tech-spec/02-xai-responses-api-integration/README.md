@@ -1,6 +1,6 @@
 # 02 xAI Responses API Integration
 
-Status: draft
+Status: approved
 
 ## Purpose
 
@@ -64,9 +64,7 @@ Define how WD integrates with the xAI Responses API in a stateful, schema-enforc
 
 ## Open Questions
 
-- Which phases require stateful continuation versus isolated calls in v1?
-- Should web/search tooling be allowed in all research-adjacent phases?
-- What are hard timeout/backoff defaults for API stability?
+- None for WD v1. Previously listed questions were resolved on 2026-03-01 and codified in `Decisions`.
 
 ## Decisions
 
@@ -74,3 +72,6 @@ Define how WD integrates with the xAI Responses API in a stateful, schema-enforc
 - Structured schema output is mandatory for all phase calls.
 - Session continuation and tool usage are explicit, auditable, and contract-bound.
 - Orchestration authority remains deterministic and script-owned; LLM participation is bounded to schema-constrained content generation.
+- Stateful continuation is enabled for `build_scenes` and `scene_qc`; `plan`, `review`, `narration`, `final_render`, and `assemble` run with isolated calls by default.
+- Web/search tooling is disabled by default in v1 and may be enabled only for explicitly research-scoped phases by configuration with audit logging.
+- Default API reliability controls are: request timeout `90s`, retryable transport attempts `3`, exponential backoff `2s/4s/8s` with jitter up to `20%`.

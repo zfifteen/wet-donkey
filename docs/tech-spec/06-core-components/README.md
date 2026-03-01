@@ -1,6 +1,6 @@
 # 06 Core Components
 
-Status: draft
+Status: approved
 
 ## Purpose
 
@@ -80,9 +80,7 @@ Define WD’s core modules, boundaries, and ownership so implementation stays mo
 
 ## Open Questions
 
-- Which components need strict package-level isolation immediately (v1)?
-- Which cross-component APIs require explicit versioning from day one?
-- Should render assembly be in orchestrator or a separate execution component?
+- None for WD v1. Previously listed questions were resolved on 2026-03-01 and codified in `Decisions`.
 
 ## Decisions
 
@@ -90,3 +88,6 @@ Define WD’s core modules, boundaries, and ownership so implementation stays mo
 - Orchestrator, harness, and validation layers remain separate ownership domains.
 - Voice provider details are adapter-internal and must not leak into phase logic.
 - Infrastructure operations (state updates, phase transitions, artifact lifecycle mutations) remain deterministic-code responsibilities.
+- Immediate package isolation in v1 is required for `scripts/` (orchestrator), `src/harness/`, `src/wet_donkey_voice/`, and render/assembly modules under `src/wet_donkey/`.
+- Cross-component APIs that must be versioned from day one are: state schema, phase schema registry, harness exit-code table, helper registry surface, and voice adapter interface.
+- Render assembly is implemented as a dedicated execution component invoked by orchestrator (not inlined in phase-control code paths).

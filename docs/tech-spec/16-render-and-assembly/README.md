@@ -1,6 +1,6 @@
 # 16 Render and Assembly
 
-Status: draft
+Status: approved
 
 ## Purpose
 
@@ -49,12 +49,13 @@ Define deterministic render and assembly behavior so final output quality is rep
 
 ## Open Questions
 
-- What duration tolerance should be enforced for final output validation?
-- Which ffmpeg/manim settings are hard policy vs configurable defaults?
-- Should assembly run be resumable from partial scene success states in v1?
+- None for WD v1. Previously listed questions were resolved on 2026-03-01 and codified in `Decisions`.
 
 ## Decisions
 
 - WD render and assembly require validated prerequisites before execution.
 - Final output is accepted only after deterministic verification checks.
 - Render/assembly diagnostics must be sufficient for reproducible failure analysis.
+- Final output duration tolerance is `max(0.5s, 2% of expected duration)` unless a phase-specific stricter bound is configured.
+- v1 policy settings for render are fixed defaults (`resolution`, `fps`, codec/container profile) with validated config overrides allowed only within documented ranges.
+- Assembly resume from partial scene success is supported in v1 when prior scene manifests and checksums are present and validated.

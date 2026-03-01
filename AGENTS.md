@@ -10,20 +10,20 @@ WD must apply FH lessons without inheriting FH architecture/sprawl.
 
 ## 2) State Snapshot (Overwrite-Only)
 
-As of: 2026-02-26
+As of: 2026-03-01
 
-- Current phase: Phase 3 (revised tech spec finalization and approval)
-- Next phase: Phase 4 (revised implementation plan), pending explicit Phase 3 approval
+- Current phase: Phase 5 (implementation execution)
+- Next phase: N/A (Phase 5 is the terminal execution phase in the canonical game plan)
 - Phase status flags:
   - P1 FH analysis: complete for current audited FH run set
   - P2 lessons learned: complete for current scope (L-013 through L-023 captured)
-  - P3 revised tech spec: draft coverage present, finalization/approval pending
-  - P4 revised implementation plan: drafted, not active until Phase 3 approval
-  - P5 implementation: pending
+  - P3 revised tech spec: approved
+  - P4 revised implementation plan: complete and approved
+  - P5 implementation: active
 - Current blockers:
-  - Resolve Phase 3 open questions and approve Phase 3 exit criteria
+  - None for Phase 5 activation; implementation execution pending milestone-by-milestone delivery
 - Next concrete action:
-  - Finalize and approve Phase 3 in `docs/tech-spec/` per explicit exit criteria
+  - Start Phase 5 execution from M0 implementation tasks, using `docs/implementation-plan/README.md` and checklist artifacts as the approved baseline
 
 Rule: this snapshot is updated in place. Never append timeline entries here.
 
@@ -110,7 +110,7 @@ At session end:
 2. Update affected canonical docs.
 3. Record unresolved risks/unknowns in canonical docs (not here).
 
-## 8) Documentation Baseline
+## 8) Documentation and Tooling Baseline
 
 - Lessons index: `docs/lessons-learned/README.md`
 - Lessons log: `docs/lessons-learned/flaming-horse-lessons.md`
@@ -118,7 +118,12 @@ At session end:
 - Revised tech spec: `docs/tech-spec/`
 - Revised implementation plan: `docs/implementation-plan/README.md`
 - Legacy plan (non-canonical): `docs/legacy/WET_DONKEY_IMPLEMENTATION_PLAN.md`
-- GitHub CLI assumption: `gh` is always available and authenticated in this workspace.
+- IntelliJ MCP is the default execution surface when available.
+  - Prefer IntelliJ-native operations for project analysis, code search, inspections, semantic symbol lookups, refactors, formatting, builds, and run configurations.
+  - Prefer IntelliJ inspection/build outputs over ad-hoc manual reasoning whenever equivalent IDE functionality exists.
+  - After material edits, run IntelliJ validation first (`get_file_problems`, then `build_project` when relevant).
+- GitHub CLI assumption: `gh` is always available and authenticated in this workspace; use `gh` for GitHub operations.
+- Shell/CLI fallback is allowed only when IntelliJ MCP lacks the needed capability or is unavailable; document fallback rationale in the session response.
 
 ## 9) File Size and Structure Guardrail
 

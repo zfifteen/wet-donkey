@@ -2,6 +2,12 @@
 
 This wiki is the canonical technical specification for Wet Donkey.
 
+## Phase 3 Finalization Status
+
+- As of 2026-03-01, all main tech-spec sections are marked `Status: approved` and section-level open questions are resolved for WD v1 scope.
+- As of 2026-03-01, Phase 3 is explicitly approved in canonical control docs.
+- As of 2026-03-01, Phase 4 is complete and Phase 5 is active per canonical state docs.
+
 ## Phase 3 Exit Criteria
 
 Phase 3 is approved only when all are true:

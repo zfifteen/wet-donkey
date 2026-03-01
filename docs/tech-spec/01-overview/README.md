@@ -1,6 +1,6 @@
 # 01 Overview
 
-Status: draft
+Status: approved
 
 ## Purpose
 
@@ -47,9 +47,7 @@ WD converts a topic into a narrated Manim video through a deterministic multi-ph
 
 ## Open Questions
 
-- Which interfaces must be locked first before implementation resumes (state, harness, scaffold, schema)?
-- What retry budget is acceptable globally and per phase?
-- What PR scope thresholds will be enforced for WD execution?
+- None for WD v1. Previously listed questions were resolved on 2026-03-01 and codified in `Decisions`.
 
 ## Decisions
 
@@ -57,3 +55,6 @@ WD converts a topic into a narrated Manim video through a deterministic multi-ph
 - WD spec wiki (`docs/tech-spec/`) is canonical and must lead implementation updates.
 - WD architecture will optimize for deterministic operation and maintainability over rapid feature expansion.
 - WD explicitly separates concerns: deterministic code is the orchestrator/control plane; the LLM is a constrained content generator.
+- The first frozen interfaces for WD v1 are: `project_state.json`, phase output schemas, scaffold slot markers, harness exit-code mapping, and helper API registry.
+- Global retry policy baseline is fixed at "first pass preferred, bounded retries only"; numeric defaults are defined in section 10 and enforced by orchestrator state policy in section 05.
+- WD execution PR scope is constrained to one architectural concern per change and a target of <= 600 net LOC for code (excluding generated artifacts and snapshots) unless a spec-approved exception is recorded.

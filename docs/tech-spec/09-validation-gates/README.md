@@ -1,6 +1,6 @@
 # 09 Validation Gates
 
-Status: draft
+Status: approved
 
 ## Purpose
 
@@ -83,9 +83,7 @@ Define a strict validation hierarchy that blocks invalid artifacts early and pre
 
 ## Open Questions
 
-- Which semantic checks are mandatory before first runtime render attempt?
-- What threshold justifies adding a new gate vs fixing upstream generation?
-- Should runtime-gate failures always include minimal repro artifacts?
+- None for WD v1. Previously listed questions were resolved on 2026-03-01 and codified in `Decisions`.
 
 ## Decisions
 
@@ -93,3 +91,6 @@ Define a strict validation hierarchy that blocks invalid artifacts early and pre
 - Every gate must be tied to a defined failure class and owner component.
 - Validation failures produce structured error payloads suitable for targeted retry prompts.
 - Scaffold boundary violations are treated as contract failures, not semantic fixes.
+- Mandatory pre-runtime semantic checks in v1 are: MathTex/LaTeX validity, color literal validity, helper signature/kwargs policy, axis/camera capability policy, and plan-lint checks for intent-only `visual_ideas`.
+- A new gate is justified only for (a) high-severity single-incident failures or (b) recurring failure classes observed in at least two independent incidents after upstream prompt/schema corrections.
+- Runtime-gate failures must attach a minimal reproducible artifact set (failing file, command, and relevant log excerpt pointers) for every blocked escalation.
