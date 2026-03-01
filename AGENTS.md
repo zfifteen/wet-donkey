@@ -21,9 +21,9 @@ As of: 2026-03-01
   - P4 revised implementation plan: complete and approved
   - P5 implementation: active
 - Current blockers:
-  - None for Phase 5 activation; implementation execution pending milestone-by-milestone delivery
+  - None
 - Next concrete action:
-  - Validate and document the `FH_ENABLE_TRAINING_CORPUS=1` path with a dedicated `XAI_MANAGEMENT_API_KEY`, then retire the temporary training-corpus-disabled live-smoke mode
+  - Expand manual live evidence beyond `init -> plan` by running a retained-artifact pass into later Phase 5 execution stages (starting with `review -> narration`)
 
 Rule: this snapshot is updated in place. Never append timeline entries here.
 

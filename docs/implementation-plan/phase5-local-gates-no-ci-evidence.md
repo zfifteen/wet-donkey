@@ -11,9 +11,9 @@ Date: 2026-03-01
 - Updated live API smoke script for manual/local execution controls and observability assertions.
 - Hardened live smoke compatibility for current runtime:
   - xAI collections bootstrap now supports `xai_sdk` create signature drift and management-key constructor usage.
-  - `init` now supports `FH_ENABLE_TRAINING_CORPUS=0` with deterministic collections metadata stubs.
   - parser now accepts JSON-string payloads returned by runtime SDK responses.
   - `init` emits `phase_start` observability for first-run project bootstrap.
+  - retired temporary `FH_ENABLE_TRAINING_CORPUS=0` fallback dependency in live validation flow.
 - Updated canonical docs to reflect no GitHub CI policy for current version.
 
 ## Workflow Removal Evidence
@@ -156,10 +156,156 @@ Observed trend summary:
 - Observed end-to-end durations (start -> success): ~33s, ~55s, ~39s.
 - No new recurring failure signatures were observed in the matrix pass.
 
+## FH_ENABLE_TRAINING_CORPUS=1 Validation (Dedicated Key + Host Compatibility)
+
+Validation run:
+
+```bash
+E2E_ENABLE_TRAINING_CORPUS=1 \
+E2E_KEEP_PROJECT=1 \
+E2E_PROJECT_NAME="e2e_live_training_on_guard_20260301_175252" \
+bash tests/test_e2e_responses_api.sh
+```
+
+Result:
+
+```text
+live_smoke_exit_code=2
+live_smoke_project_dir=/Users/velocityworks/IdeaProjects/wet-donkey/projects/e2e_live_training_on_guard_20260301_175252
+```
+
+Failure context (captured from `project_state.json`):
+
+```text
+error_code=POLICY_VIOLATION
+phase=init
+blocked=true
+blocked_reason=FORCE_BLOCK
+error_message=FH_ENABLE_TRAINING_CORPUS=1 requires a dedicated XAI_MANAGEMENT_API_KEY; reusing XAI_API_KEY is not allowed for collections operations
+```
+
+Conclusion:
+- `FH_ENABLE_TRAINING_CORPUS=1` path is now deterministically guarded.
+- Dedicated management-key reuse guard works as expected (API key reuse is blocked).
+
+Revalidation attempt after `.env` management-key update (2026-03-01):
+
+```bash
+E2E_ENABLE_TRAINING_CORPUS=1 \
+E2E_KEEP_PROJECT=1 \
+E2E_PROJECT_NAME="e2e_live_training_on_valid_20260301_175742" \
+bash tests/test_e2e_responses_api.sh
+```
+
+Observed result:
+
+```text
+live_smoke_exit_code=2
+live_smoke_project_dir=/Users/velocityworks/IdeaProjects/wet-donkey/projects/e2e_live_training_on_valid_20260301_175742
+Error: Invalid XAI_MANAGEMENT_API_KEY for collections operations. Provide a dedicated management key and retry.
+```
+
+Interpretation:
+- `XAI_MANAGEMENT_API_KEY` is present and different from `XAI_API_KEY`, but still rejected by Collections API (`UNAUTHENTICATED` / invalid bearer token).
+- Root cause was not key presence but management host compatibility for collections calls in this environment.
+
+Remediation applied:
+- `scripts/initialize_training_corpus.py` now attempts management host candidates in order:
+  - `management-api.x.ai`
+  - `api.x.ai` fallback when legacy host returns `UNAUTHENTICATED Invalid bearer token`
+- Host can be explicitly overridden with `XAI_MANAGEMENT_API_HOST`.
+
+Validation run after remediation (2026-03-01):
+
+```bash
+E2E_ENABLE_TRAINING_CORPUS=1 \
+E2E_KEEP_PROJECT=1 \
+E2E_PROJECT_NAME="e2e_live_training_on_fixed_20260301_180209" \
+bash tests/test_e2e_responses_api.sh
+```
+
+Observed result:
+
+```text
+live_smoke_exit_code=0
+live_smoke_project_dir=/Users/velocityworks/IdeaProjects/wet-donkey/projects/e2e_live_training_on_fixed_20260301_180209
+Using fallback management API host: api.x.ai
+Phase correctly advanced to 'review'
+Observability assertions passed for init and plan
+```
+
+Post-run verification:
+
+```text
+phase=review
+phase_status=active
+events_path=/Users/velocityworks/IdeaProjects/wet-donkey/projects/e2e_live_training_on_fixed_20260301_180209/log/events.jsonl
+init:phase_start:1
+init:phase_success:1
+plan:phase_start:1
+plan:phase_success:1
+phase_failure:0
+collections_metadata=/Users/velocityworks/IdeaProjects/wet-donkey/projects/e2e_live_training_on_fixed_20260301_180209/.collections_metadata.json
+```
+
+Current state:
+- `E2E_ENABLE_TRAINING_CORPUS=1` live smoke is now passing with retained artifacts.
+- Stability expansion completed with a 3-topic live matrix under training-corpus-enabled mode.
+- Temporary `FH_ENABLE_TRAINING_CORPUS=0` fallback dependency has been retired from live validation flow.
+
+Fallback retirement verification run (2026-03-01):
+
+```bash
+E2E_KEEP_PROJECT=1 \
+E2E_PROJECT_NAME="e2e_live_post_fallback_retire_20260301_181812" \
+bash tests/test_e2e_responses_api.sh
+```
+
+Observed result:
+
+```text
+live_smoke_exit_code=0
+live_smoke_project_dir=/Users/velocityworks/IdeaProjects/wet-donkey/projects/e2e_live_post_fallback_retire_20260301_181812
+Using fallback management API host: api.x.ai
+Phase correctly advanced to 'review'
+Observability assertions passed for init and plan
+```
+
+Training-enabled live matrix execution (2026-03-01):
+
+```bash
+E2E_ENABLE_TRAINING_CORPUS=1
+E2E_KEEP_PROJECT=1
+bash tests/test_e2e_responses_api.sh  # repeated with per-run E2E_PROJECT_NAME and E2E_TOPIC
+```
+
+Runs completed: 3/3 successful.
+
+- `e2e_live_training_matrix_1_20260301_180531`
+  topic: The first 30 seconds of a video explaining the Pythagorean theorem
+  exit: `0`, final phase: `review`, plan title: non-empty
+  events: `init(start/success)=1/1`, `plan(start/success)=1/1`, `phase_failure=0`
+  project dir: `/Users/velocityworks/IdeaProjects/wet-donkey/projects/e2e_live_training_matrix_1_20260301_180531`
+- `e2e_live_training_matrix_2_20260301_180643`
+  topic: A concise intuition for derivatives as slope
+  exit: `0`, final phase: `review`, plan title: non-empty
+  events: `init(start/success)=1/1`, `plan(start/success)=1/1`, `phase_failure=0`
+  project dir: `/Users/velocityworks/IdeaProjects/wet-donkey/projects/e2e_live_training_matrix_2_20260301_180643`
+- `e2e_live_training_matrix_3_20260301_180717`
+  topic: How binary search halves the search space
+  exit: `0`, final phase: `review`, plan title: non-empty
+  events: `init(start/success)=1/1`, `plan(start/success)=1/1`, `phase_failure=0`
+  project dir: `/Users/velocityworks/IdeaProjects/wet-donkey/projects/e2e_live_training_matrix_3_20260301_180717`
+
+Observed trend summary:
+- Success rate: `100%` (3/3).
+- No `phase_failure` events detected.
+- Collections initialization succeeded in all runs using fallback management host `api.x.ai`.
+
 ## Manual Live API Smoke Procedure
 
 1. Ensure `.env` has both `XAI_API_KEY` and `XAI_MANAGEMENT_API_KEY`.
-2. Run `FH_ENABLE_TRAINING_CORPUS=0 E2E_KEEP_PROJECT=1 E2E_PROJECT_NAME=\"e2e_live_<timestamp>\" bash tests/test_e2e_responses_api.sh`.
+2. Run `E2E_KEEP_PROJECT=1 E2E_PROJECT_NAME=\"e2e_live_<timestamp>\" bash tests/test_e2e_responses_api.sh`.
 3. Confirm live smoke reaches `phase=review` and emits `phase_start` + `phase_success` for `init` and `plan`.
 4. Confirm no `phase_failure` event is present in `projects/<run_id>/log/events.jsonl`.
 

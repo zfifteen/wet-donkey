@@ -2,9 +2,11 @@
 import argparse
 import os
 import json
+import sys
 from inspect import signature
 from pathlib import Path
 from datetime import datetime, timezone
+import grpc
 from xai_sdk import Client
 
 SESSION_CONTRACT_VERSION = "1.0.0"
@@ -23,6 +25,61 @@ def create_collection_compat(client: Client, name: str, description: str):
     return client.collections.create(**kwargs)
 
 
+def classify_collections_error(error: Exception) -> RuntimeError:
+    message = str(error)
+    if "StatusCode.UNAUTHENTICATED" in message or "Invalid bearer token" in message:
+        return RuntimeError(
+            "Invalid XAI_MANAGEMENT_API_KEY for collections operations. "
+            "Provide a dedicated management key and retry."
+        )
+    return RuntimeError(f"Collections initialization failed: {message}")
+
+
+def _management_host_candidates() -> list[str]:
+    explicit_host = os.getenv("XAI_MANAGEMENT_API_HOST", "").strip()
+    if explicit_host:
+        return [explicit_host]
+    return ["management-api.x.ai", "api.x.ai"]
+
+
+def _build_client_with_host_fallback(
+    api_key: str,
+    management_api_key: str,
+):
+    last_error: Exception | None = None
+    for host in _management_host_candidates():
+        try:
+            client = Client(
+                api_key=api_key,
+                management_api_key=management_api_key,
+                management_api_host=host,
+            )
+            # Auth ping against management surface before mutations.
+            client.collections.list(limit=1)
+            if host != "management-api.x.ai":
+                print(f"Using fallback management API host: {host}")
+            return client
+        except grpc.RpcError as error:
+            details = error.details() if hasattr(error, "details") else str(error)
+            if (
+                host == "management-api.x.ai"
+                and error.code() == grpc.StatusCode.UNAUTHENTICATED
+                and "Invalid bearer token" in details
+            ):
+                last_error = error
+                continue
+            raise
+        except Exception as error:
+            if host == "management-api.x.ai":
+                last_error = error
+                continue
+            raise
+
+    if last_error is not None:
+        raise last_error
+    raise RuntimeError("Unable to initialize management API client.")
+
+
 def initialize_training_corpus(project_dir: str, project_name: str, template_collection_id: str = None):
     """Create Collections for template library and scene examples"""
     project_dir = Path(project_dir)
@@ -30,12 +87,14 @@ def initialize_training_corpus(project_dir: str, project_name: str, template_col
     if not management_api_key:
         print("Warning: XAI_MANAGEMENT_API_KEY is not set. Skipping collection creation.")
         return
+    api_key = os.getenv("XAI_API_KEY")
+    if not api_key:
+        raise RuntimeError("XAI_API_KEY is required for SDK initialization.")
 
-    try:
-        client = Client(management_api_key=management_api_key)
-    except TypeError:
-        # Backward compatibility with SDK versions that only expose `api_key`.
-        client = Client(api_key=management_api_key)
+    client = _build_client_with_host_fallback(
+        api_key=api_key,
+        management_api_key=management_api_key,
+    )
 
     # 1. Template library collection
     if template_collection_id:
@@ -90,7 +149,16 @@ def main():
     
     args = parser.parse_args()
     
-    initialize_training_corpus(args.project_dir, args.project_name, args.template_collection_id)
+    try:
+        initialize_training_corpus(args.project_dir, args.project_name, args.template_collection_id)
+    except RuntimeError:
+        raise
+    except Exception as error:
+        raise classify_collections_error(error) from error
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except RuntimeError as exc:
+        print(f"Error: {exc}", file=sys.stderr)
+        raise SystemExit(4) from exc

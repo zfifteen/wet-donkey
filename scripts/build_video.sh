@@ -252,19 +252,6 @@ EOF
   return 1
 }
 
-write_disabled_collections_metadata() {
-  local metadata_file="$PROJECT_DIR/.collections_metadata.json"
-  cat > "$metadata_file" <<EOF
-{
-  "contract_version": "1.0.0",
-  "template_collection_id": "disabled-template-collection",
-  "project_collection_id": "disabled-project-collection",
-  "documents": [],
-  "updated_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-}
-EOF
-}
-
 # --- Phase Handlers ---
 
 handle_init() {
@@ -280,18 +267,21 @@ handle_init() {
     emit_phase_event "phase_start" "$CURRENT_PHASE_ATTEMPT" "phase start after project bootstrap"
   fi
 
-  local training_corpus_enabled="${FH_ENABLE_TRAINING_CORPUS:-1}"
-  if [[ "$training_corpus_enabled" != "1" ]]; then
-    log_info "Training corpus initialization is disabled (FH_ENABLE_TRAINING_CORPUS=${training_corpus_enabled})."
-    write_disabled_collections_metadata
-    advance_phase "plan"
-    return 0
-  fi
-
   if [[ -z "${XAI_MANAGEMENT_API_KEY:-}" ]]; then
     record_phase_failure \
       "POLICY_VIOLATION" \
       "XAI_MANAGEMENT_API_KEY is required for init phase" \
+      "contract" \
+      "orchestrator" \
+      "false" \
+      "true"
+    return 1
+  fi
+
+  if [[ -n "${XAI_API_KEY:-}" ]] && [[ "${XAI_MANAGEMENT_API_KEY}" = "${XAI_API_KEY}" ]]; then
+    record_phase_failure \
+      "POLICY_VIOLATION" \
+      "init requires a dedicated XAI_MANAGEMENT_API_KEY; reusing XAI_API_KEY is not allowed for collections operations" \
       "contract" \
       "orchestrator" \
       "false" \
