@@ -3,6 +3,7 @@ from pathlib import Path
 import jinja2
 
 from .contracts.prompt_manifest import (
+    PromptManifest,
     discover_template_variables,
     load_prompt_manifest,
     validate_manifest_schema_alignment,
@@ -12,6 +13,20 @@ from .contracts.prompt_manifest import (
 )
 
 PROMPTS_DIR = Path(__file__).parent / "prompts"
+
+TOOL_DEFINITIONS: dict[str, str] = {
+    "collections_search": (
+        "Query project/template collections for reference patterns and prior context. "
+        "Use this to ground outputs in known examples."
+    ),
+    "code_execution": (
+        "Run deterministic calculations/checks (timing, counts, numeric validation). "
+        "Use this to verify concrete claims before finalizing output."
+    ),
+    "web_search": (
+        "Research externally-sourced facts when the phase requires current or factual grounding."
+    ),
+}
 
 
 def _resolve_phase_dir(phase_name: str) -> Path:
@@ -33,6 +48,28 @@ def validate_prompt_contracts() -> None:
     for phase_dir in sorted(PROMPTS_DIR.iterdir()):
         if phase_dir.is_dir():
             _validate_phase_contracts(phase_dir)
+
+
+def _tool_contract_block(manifest: PromptManifest) -> str:
+    allowed = ", ".join(manifest.allowed_tools) if manifest.allowed_tools else "none"
+    required = ", ".join(manifest.required_tools) if manifest.required_tools else "none"
+    tool_lines: list[str] = []
+    for tool_name in manifest.allowed_tools:
+        definition = TOOL_DEFINITIONS.get(tool_name, "No definition available.")
+        tool_lines.append(f"- `{tool_name}`: {definition}")
+    if not tool_lines:
+        tool_lines.append("- none")
+
+    return (
+        "Tool Contract (manifest-derived):\n"
+        f"- Allowed tools: {allowed}\n"
+        f"- Required tools: {required}\n"
+        "- Tool definitions:\n"
+        + "\n".join(tool_lines)
+        + "\n"
+        "- Use required tools when listed.\n"
+        "- Do not claim tool usage unless the call was actually made."
+    )
 
 
 def compose_prompts(phase_name: str, **kwargs) -> dict:
@@ -69,6 +106,7 @@ def compose_prompts(phase_name: str, **kwargs) -> dict:
     )
     
     system_prompt = environment.get_template("system.md").render(**kwargs)
+    system_prompt = f"{system_prompt.rstrip()}\n\n{_tool_contract_block(manifest)}\n"
     user_prompt = environment.get_template("user.md").render(**kwargs)
 
     return {

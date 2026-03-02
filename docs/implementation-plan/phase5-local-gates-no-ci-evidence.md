@@ -271,6 +271,94 @@ Phase correctly advanced to 'review'
 Observability assertions passed for init and plan
 ```
 
+## Manual Progression Evidence: `review -> narration` (Retained Artifacts)
+
+Manual transition and execution run (2026-03-01):
+
+```bash
+python3.13 scripts/update_project_state.py set \
+  --project-dir projects/e2e_live_post_fallback_retire_20260301_181812 \
+  --key phase \
+  --value narration \
+  --actor manual-review
+
+bash scripts/build_video.sh e2e_live_post_fallback_retire_20260301_181812 \
+  --topic \"The first 30 seconds of a video explaining the Pythagorean theorem\"
+```
+
+Observed result:
+
+```text
+phase=build_scenes
+phase_status=active
+review_to_narration_transitions=1
+narration:phase_start:1
+narration:phase_success:1
+narration:phase_failure:0
+narration:phase_blocked:0
+narration_script.py=present
+artifacts/scene_manifest.json=present
+scenes_count=17
+project_dir=/Users/velocityworks/IdeaProjects/wet-donkey/projects/e2e_live_post_fallback_retire_20260301_181812
+events_path=/Users/velocityworks/IdeaProjects/wet-donkey/projects/e2e_live_post_fallback_retire_20260301_181812/log/events.jsonl
+```
+
+## Manual Progression Evidence: `build_scenes -> scene_qc` (Retained Artifacts)
+
+Execution target:
+
+```text
+project_dir=/Users/velocityworks/IdeaProjects/wet-donkey/projects/e2e_live_post_fallback_retire_20260301_181812
+```
+
+Commands:
+
+```bash
+bash scripts/build_video.sh e2e_live_post_fallback_retire_20260301_181812 --topic "<stored topic>"   # build_scenes
+bash scripts/build_video.sh e2e_live_post_fallback_retire_20260301_181812 --topic "<stored topic>"   # scene_qc
+python3.13 scripts/runtime_phase_contracts.py validate-build-scenes --project-dir projects/e2e_live_post_fallback_retire_20260301_181812
+python3.13 scripts/runtime_phase_contracts.py validate-scene-qc --project-dir projects/e2e_live_post_fallback_retire_20260301_181812
+```
+
+Observed outcomes:
+
+```text
+build_scenes: completed once and advanced to scene_qc
+build_scenes_to_scene_qc_transitions=1
+validate-build-scenes: status=ok, scene_count=17
+
+scene_qc: executed repeatedly, generated QC reports for all 17 scenes
+validate-scene-qc: failed threshold gate (multiple scenes scored < 0.7 and/or passed=false)
+phase remains scene_qc (phase_status=active)
+```
+
+Observability coverage from `events.jsonl`:
+
+```text
+build_scenes:phase_start:3
+build_scenes:phase_success:1
+build_scenes:phase_failure:2
+build_scenes:phase_blocked:0
+
+scene_qc:phase_start:9
+scene_qc:phase_success:0
+scene_qc:phase_failure:9
+scene_qc:phase_blocked:0
+```
+
+Remediations applied during this slice:
+- Parser timing-validation compatibility fix for SDK tool-usage shape:
+  - accepted `SERVER_SIDE_TOOL_CODE_EXECUTION: <count>` form.
+  - added fallback timing-marker validation from `scene_body` when tool metadata is absent.
+- Session stability fix for scene-level phases:
+  - `build_scenes` and `scene_qc` now run without `previous_response_id` to prevent context growth and truncated schema payloads.
+- Targeted scene file fixes on retained artifact project:
+  - repaired syntax/runtime issues in scenes 13, 16, and 17 to address deterministic QC defects.
+
+Current status of this progression:
+- Contract/observability evidence for both phases is complete.
+- Scene quality gate still requires iterative repair/stabilization before `scene_qc -> precache_voiceovers`.
+
 Training-enabled live matrix execution (2026-03-01):
 
 ```bash

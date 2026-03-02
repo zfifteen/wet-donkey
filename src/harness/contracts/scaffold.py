@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from textwrap import dedent
 from typing import Union
 
 SLOT_START_MARKER = "# SLOT_START:scene_body"
@@ -30,13 +31,21 @@ def inject_scene_body(content: str, scene_body: str) -> str:
         raise ScaffoldContractError("generated scene body must not contain slot markers")
 
     start_index, end_index = _marker_positions(content)
+    marker_line_start = content.rfind("\n", 0, start_index) + 1
+    marker_indent = content[marker_line_start:start_index]
+    end_line_start = content.rfind("\n", 0, end_index) + 1
+    normalized_body = dedent(scene_body).strip("\n")
+    indented_body = "\n".join(
+        f"{marker_indent}{line}" if line.strip() else ""
+        for line in normalized_body.splitlines()
+    )
 
     return (
         content[: start_index + len(SLOT_START_MARKER)]
         + "\n"
-        + scene_body
-        + "\n    "
-        + content[end_index:]
+        + indented_body
+        + "\n"
+        + content[end_line_start:]
     )
 
 

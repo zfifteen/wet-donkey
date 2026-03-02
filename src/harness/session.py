@@ -80,11 +80,15 @@ class PipelineTrainingSession:
         if phase in ["plan", "narration"]:
             tools.append(web_search())
 
+        # Keep stateful context for narrative phases only; scene-level phases are
+        # intentionally stateless to avoid runaway context growth across many scenes.
+        previous_response_id = self.response_id if phase in {"plan", "narration"} else None
+
         return self.client.chat.create(
             model="grok-4-1-fast-reasoning",
             tools=tools,
             store_messages=True,
-            previous_response_id=self.response_id,
+            previous_response_id=previous_response_id,
             response_format=resolved_schema,
         )
 

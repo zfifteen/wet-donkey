@@ -21,9 +21,9 @@ As of: 2026-03-01
   - P4 revised implementation plan: complete and approved
   - P5 implementation: active
 - Current blockers:
-  - None
+  - `scene_qc` quality threshold gate is not yet passing on retained live project `e2e_live_post_fallback_retire_20260301_181812`
 - Next concrete action:
-  - Expand manual live evidence beyond `init -> plan` by running a retained-artifact pass into later Phase 5 execution stages (starting with `review -> narration`)
+  - Execute targeted scene repair loop on failing QC scenes and rerun `scene_qc` until phase advances to `precache_voiceovers`
 
 Rule: this snapshot is updated in place. Never append timeline entries here.
 

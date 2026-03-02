@@ -20,13 +20,22 @@ TEMPLATE = f"""class Demo(Scene):
 
 
 def test_inject_scene_body_preserves_markers() -> None:
-    body = "title = Text('Hello')\n            self.play(Write(title))"
+    body = "title = Text('Hello')\nself.play(Write(title))"
 
     rendered = inject_scene_body(TEMPLATE, body)
 
     assert rendered.count(SLOT_START_MARKER) == 1
     assert rendered.count(SLOT_END_MARKER) == 1
-    assert body in rendered
+    assert "            title = Text('Hello')" in rendered
+    assert "            self.play(Write(title))" in rendered
+
+
+def test_inject_scene_body_normalizes_existing_indentation() -> None:
+    body = "    title = Text('Hello')\n        self.play(Write(title))"
+    rendered = inject_scene_body(TEMPLATE, body)
+    assert "            title = Text('Hello')" in rendered
+    assert "                self.play(Write(title))" in rendered
+    assert "            # SLOT_END:scene_body" in rendered
 
 
 def test_inject_scene_body_requires_markers() -> None:

@@ -42,3 +42,26 @@ def test_create_chat_skips_collections_search_when_training_corpus_disabled() ->
 
         kwargs = mock_client.return_value.chat.create.call_args.kwargs
         assert "collections_tool" not in kwargs["tools"]
+
+
+def test_create_chat_uses_previous_response_only_for_plan_and_narration() -> None:
+    with (
+        patch("harness.session.Client") as mock_client,
+        patch("harness.session.collections_search", return_value="collections_tool"),
+        patch("harness.session.code_execution", return_value="code_tool"),
+        patch("harness.session.web_search", return_value="web_tool"),
+        patch.dict(os.environ, {"FH_ENABLE_TRAINING_CORPUS": "1"}, clear=False),
+    ):
+        session = PipelineTrainingSession(
+            project_dir="/tmp/test_project",
+            collection_ids=["coll_a", "coll_b"],
+            response_id="resp_123",
+        )
+
+        session.create_chat("plan")
+        plan_kwargs = mock_client.return_value.chat.create.call_args.kwargs
+        assert plan_kwargs["previous_response_id"] == "resp_123"
+
+        session.create_chat("build_scenes")
+        scene_kwargs = mock_client.return_value.chat.create.call_args.kwargs
+        assert scene_kwargs["previous_response_id"] is None

@@ -4,7 +4,12 @@ import json
 import pytest
 from pydantic import ValidationError
 
-from harness.parser import validate_parser_schema_alignment, validate_phase_payload
+from harness.parser import (
+    SemanticValidationError,
+    validate_parser_schema_alignment,
+    validate_phase_payload,
+    validate_timing_execution,
+)
 from harness.schemas.plan import Plan
 from harness.schemas.scene_build import SceneBuild
 
@@ -88,3 +93,28 @@ def test_validate_plan_payload_accepts_json_string() -> None:
     }
     result = validate_phase_payload("plan", json.dumps(payload))
     assert isinstance(result, Plan)
+
+
+class _TimingResponse:
+    def __init__(self, server_side_tool_usage, content=None):
+        self.server_side_tool_usage = server_side_tool_usage
+        self.content = content or {}
+
+
+def test_validate_timing_execution_accepts_count_shape() -> None:
+    response = _TimingResponse({"SERVER_SIDE_TOOL_CODE_EXECUTION": 1})
+    assert validate_timing_execution(response) is True
+
+
+def test_validate_timing_execution_rejects_missing_code_execution() -> None:
+    response = _TimingResponse({"SERVER_SIDE_TOOL_COLLECTIONS_SEARCH": 2})
+    with pytest.raises(SemanticValidationError, match="code_execution timing validation"):
+        validate_timing_execution(response)
+
+
+def test_validate_timing_execution_accepts_scene_body_timing_fallback() -> None:
+    response = _TimingResponse(
+        {"SERVER_SIDE_TOOL_COLLECTIONS_SEARCH": 2},
+        content={"scene_body": "self.play(FadeIn(title), run_time=1.2)"},
+    )
+    assert validate_timing_execution(response) is True

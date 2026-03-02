@@ -282,7 +282,7 @@ For each milestone, produce:
 
 - Created: `docs/implementation-plan/README.md`.
 - Phase state: Phase 4 complete; plan approved as the active execution baseline for Phase 5.
-- Next action: expand manual live evidence beyond `init -> plan` by executing a retained-artifact pass from `review` into later Phase 5 stages, starting with `narration`.
+- Next action: run targeted repair for failing QC scenes in retained live project and iterate `scene_qc` until threshold gate passes and phase advances to `precache_voiceovers`.
 
 ## 11) Phase 4 Completion Record
 

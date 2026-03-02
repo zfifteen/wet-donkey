@@ -60,3 +60,21 @@ def test_manifest_template_alignment_and_tool_policy_per_phase() -> None:
         validate_manifest_schema_alignment(manifest)
         validate_manifest_tool_policy(manifest)
         assert set(manifest.allowed_tools).issubset(PHASE_ALLOWED_TOOLS[phase])
+
+
+def test_compose_prompts_includes_manifest_tool_contract_block() -> None:
+    payload = compose_prompts(
+        "04_build_scenes",
+        scene_title="Scene A",
+        scene_description="Description",
+        narration_duration=30,
+        visual_ideas="bar chart",
+        retry_context=None,
+    )
+
+    system = payload["system"]
+    assert "Tool Contract (manifest-derived):" in system
+    assert "Allowed tools: collections_search, code_execution" in system
+    assert "Required tools: collections_search, code_execution" in system
+    assert "`collections_search`:" in system
+    assert "`code_execution`:" in system
